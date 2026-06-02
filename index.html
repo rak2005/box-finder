@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>UPS Store Team Tools — Box Finder</title>
+
+<!-- PWA / iOS home-screen -->
+<meta name="theme-color" content="#009CBD">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Team Tools">
+
+<!-- PWA manifest + home-screen icon -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    color: #1a1a2e;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #009CBD 0%, #007a9e 100%);
+    color: white;
+    padding: 14px 24px;
+    padding-top: calc(14px + env(safe-area-inset-top));
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,156,189,0.3);
+  }
+  .header-logo {
+    width: 44px; height: 44px;
+    background: #FFB500;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 10px; line-height: 1.2;
+    text-align: center; color: #351C15;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .header p { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+
+  /* Tab Navigation */
+  .tab-nav {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .tab-btn {
+    flex: 1; padding: 10px 8px;
+    border: none; background: white;
+    font-size: 12px; font-weight: 600; color: #94a3b8;
+    cursor: pointer; border-bottom: 3px solid transparent;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .tab-btn.active { color: #009CBD; border-bottom-color: #FFB500; background: #f0fbff; }
+  .tab-btn .tab-icon { display: block; font-size: 20px; margin-bottom: 3px; }
+
+  /* Tab Content */
+  .tab-content { display: none; padding: 20px; max-width: 860px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* UPS Warning Banners */
+  .ups-warning {
+    border-radius: 10px; padding: 12px 16px;
+    align-items: flex-start; gap: 12px;
+    margin-bottom: 14px; display: none;
+    border-left: 4px solid transparent;
+  }
+  .ups-warning.show { display: flex; }
+  .ups-warning.danger    { background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316; }
+  .ups-warning.overlimit { background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #ef4444; }
+  .ups-warning .warn-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .ups-warning .warn-text strong { display: block; font-size: 13px; margin-bottom: 2px; font-weight: 700; }
+  .ups-warning .warn-text span { font-size: 12px; opacity: 0.8; }
+
+  /* Cards */
+  .card {
+    background: white; border-radius: 16px;
+    padding: 22px; margin-bottom: 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,156,189,0.05);
+    border: 1px solid #e8edf5;
+  }
+  .card h2 { font-size: 17px; color: #009CBD; margin-bottom: 3px; font-weight: 700; letter-spacing: -0.3px; }
+  .card .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 18px; }
+
+  /* Form Elements */
+  .form-row { display: grid; gap: 12px; margin-bottom: 14px; }
+  .form-row.col4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .form-group { display: flex; flex-direction: column; min-width: 0; }
+  .form-group label {
+    font-size: 11px; font-weight: 700; color: #64748b;
+    margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  .form-group input, .form-group select {
+    padding: 11px 13px; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; font-size: 16px; background: #f8fafc;
+    transition: all 0.2s; -webkit-appearance: none; color: #1a1a2e;
+    width: 100%; min-width: 0;
+  }
+  .form-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none; border-color: #009CBD; background-color: white;
+    box-shadow: 0 0 0 3px rgba(0,156,189,0.12);
+  }
+  .form-group input.invalid { border-color: #ef4444; background: #fef2f2; }
+  .form-group input::placeholder { color: #cbd5e1; }
+
+  /* Buttons */
+  .btn {
+    padding: 13px 24px; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    transition: all 0.18s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    letter-spacing: -0.2px;
+  }
+  .btn-primary { background: linear-gradient(135deg, #009CBD 0%, #007a9e 100%); color: white; box-shadow: 0 2px 8px rgba(0,156,189,0.25); }
+  .btn-block   { width: 100%; }
+  .btn-primary:active { transform: scale(0.98); opacity: 0.95; }
+
+  /* Packing Pills */
+  .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    padding: 9px 18px; border: 1.5px solid #e2e8f0;
+    border-radius: 24px; font-size: 14px; font-weight: 600;
+    cursor: pointer; background: white; transition: all 0.18s; color: #475569;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pill:hover { border-color: #009CBD; color: #009CBD; }
+  .pill.selected { border-color: #009CBD; background: #009CBD; color: white; box-shadow: 0 2px 8px rgba(0,156,189,0.2); }
+
+  /* Result Areas */
+  .result-empty {
+    border: 2px dashed #e2e8f0; border-radius: 14px;
+    padding: 36px 24px; text-align: center; color: #cbd5e1;
+    background: #f8fafc; margin-top: 14px;
+  }
+  .result-empty .result-icon { font-size: 44px; margin-bottom: 10px; }
+  .result-empty p { font-size: 14px; }
+
+  /* No-match state */
+  .no-match {
+    border: 1.5px solid #fecaca; background: #fef2f2; border-radius: 14px;
+    padding: 24px; text-align: center; margin-top: 14px; display: none;
+  }
+  .no-match.show { display: block; }
+  .no-match .nm-icon { font-size: 38px; margin-bottom: 8px; }
+  .no-match strong { display: block; font-size: 15px; color: #b91c1c; margin-bottom: 4px; }
+  .no-match span { font-size: 13px; color: #7f1d1d; }
+
+  /* Box Finder Result */
+  .box-result {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1.5px solid #86efac;
+    border-radius: 14px; padding: 18px; margin-top: 14px; display: none;
+  }
+  .box-result.show { display: block; }
+  .best-label {
+    font-size: 11px; font-weight: 700; color: #16a34a;
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+  }
+  .box-result h3 { font-size: 26px; font-weight: 800; margin-bottom: 4px; color: #1a1a2e; letter-spacing: -0.5px; }
+  .res-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; }
+  .res-header .res-dims { margin-bottom: 0; }
+  .res-header .cms-dims { margin-top: 0; flex-shrink: 0; }
+  .res-dims { margin-bottom: 10px; }
+  .res-dims .dim-single { font-size: 26px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; }
+  .cut-display { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .cut-display .dim-block { display: flex; flex-direction: column; }
+  .cut-display .dim-cap { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 1px; }
+  .cut-display .dim-main { font-size: 23px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.5px; line-height: 1.05; }
+  .cut-display .dim-main.cut { color: #009CBD; }
+  .cut-display .cut-sep { font-size: 22px; align-self: center; }
+  .box-cat-tag { margin-bottom: 12px; }
+  .price-breakdown { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .price-item {
+    background: white; border-radius: 10px; padding: 10px 14px;
+    border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .price-item .pi-label { font-size: 10px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .price-item .pi-value { font-size: 20px; font-weight: 800; color: #009CBD; margin-top: 2px; }
+  .price-item.total { background: linear-gradient(135deg, #009CBD 0%, #007a9e 100%); border-color: transparent; }
+  .price-item.total .pi-label { color: rgba(255,255,255,0.65); }
+  .price-item.total .pi-value { color: white; }
+  .fit-note { font-size: 13px; color: #475569; }
+
+  .alt-boxes { margin-top: 12px; padding-top: 12px; border-top: 1px solid #bbf7d0; }
+  .alt-boxes p { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .alt-box-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; color: #475569; border-bottom: 1px solid #dcfce7; gap: 10px; }
+  .alt-box-row:last-child { border-bottom: none; }
+  .alt-box-row .alt-meta { color: #888; text-align: right; }
+
+  /* CMS Dimensions */
+  .cms-dims {
+    display: flex; align-items: center; gap: 10px;
+    background: #f0fbff; border: 1.5px solid #7dd3fc;
+    border-radius: 10px; padding: 10px 14px; margin-top: 12px;
+  }
+  .cms-dims .cms-icon { font-size: 18px; flex-shrink: 0; }
+  .cms-dims .cms-label { font-size: 11px; font-weight: 700; color: #0369a1;
+    text-transform: uppercase; letter-spacing: 0.5px; }
+  .cms-dims .cms-value { font-size: 18px; font-weight: 800; color: #1a1a2e; letter-spacing: -0.3px; }
+  .cms-dims .cms-note { font-size: 11px; color: #64748b; margin-top: 1px; }
+
+  /* Heavy advisory */
+  .heavy-advisory {
+    margin-top: 12px; padding: 10px 12px;
+    background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316;
+    border-radius: 8px; font-size: 13px; color: #9a3412;
+  }
+
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+  }
+  .tag-green  { background: #dcfce7; color: #15803d; }
+  .tag-blue   { background: #dbeafe; color: #1d4ed8; }
+  .tag-amber  { background: #fef9c3; color: #b45309; }
+  .tag-purple { background: #f3e8ff; color: #7e22ce; }
+  .tag-gray   { background: #f1f5f9; color: #475569; }
+  .tag-275    { background: #fef9c3; color: #b45309; margin-left: 6px; }
+
+  /* Coming-soon placeholder for not-yet-built tabs */
+  .soon {
+    border: 2px dashed #e2e8f0; border-radius: 16px;
+    padding: 48px 24px; text-align: center; color: #94a3b8; background: white;
+  }
+  .soon .soon-icon { font-size: 48px; margin-bottom: 12px; }
+  .soon h2 { font-size: 18px; color: #475569; margin-bottom: 6px; }
+  .soon p { font-size: 14px; }
+
+  /* ── SETTINGS ── */
+  .settings-section h3 {
+    font-size: 12px; font-weight: 700; color: #009CBD;
+    text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 2px solid #dbeafe;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .settings-section h3 .sec-note { font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0; color: #94a3b8; }
+  .sec-desc { font-size: 13px; color: #94a3b8; margin-bottom: 14px; line-height: 1.5; }
+
+  .form-row.col2 { grid-template-columns: 1fr 1fr; }
+  .form-row.col3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .btn-outline { background: white; color: #009CBD; border: 1.5px solid #009CBD; }
+  .btn-danger  { background: #fef2f2; color: #dc2626; border: 1.5px solid #fecaca; }
+  .btn-sm      { padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .box-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .box-table th {
+    text-align: left; font-size: 11px; font-weight: 700; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 8px 10px; border-bottom: 2px solid #e2e8f0; background: #f8fafc;
+  }
+  .box-table td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; }
+  .box-table tr:last-child td { border-bottom: none; }
+  .box-table tr:hover td { background: #f8fafc; }
+  .box-table .td-price { font-weight: 700; color: #009CBD; white-space: nowrap; }
+  .box-table .td-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+  .add-box-form {
+    background: #f0f7ff; border: 1.5px solid #93c5fd;
+    border-radius: 12px; padding: 16px; margin-top: 14px; display: none;
+  }
+  .add-box-form.show { display: block; }
+  .add-box-form h4 { font-size: 14px; font-weight: 700; color: #009CBD; margin-bottom: 12px; }
+
+  .pack-price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pack-price-item {
+    background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px;
+    padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .pack-price-item .ppi-label { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .pack-price-item .ppi-sub { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .pack-price-item .ppi-input { display: flex; align-items: center; gap: 4px; font-weight: 700; color: #64748b; }
+  .pack-price-item input {
+    width: 84px; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-size: 15px; text-align: center; font-weight: 700; background: white; color: #1a1a2e;
+  }
+  .pack-price-item input:focus { outline: none; border-color: #009CBD; box-shadow: 0 0 0 3px rgba(0,156,189,0.1); }
+
+  .dm-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  .save-bar {
+    position: sticky; bottom: 0; background: white;
+    padding: 14px 0; border-top: 1px solid #e2e8f0;
+    display: flex; gap: 12px; align-items: center; margin-top: 4px;
+  }
+  .save-status { font-size: 14px; font-weight: 700; color: #16a34a; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+  .save-status.show { opacity: 1; }
+
+  /* ── MOBILE RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .form-group label { font-size: 10px; letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header { padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top)); gap: 12px; }
+    .header-logo { width: 38px; height: 38px; font-size: 9px; border-radius: 8px; }
+    .header h1 { font-size: 17px; }
+    .header p { font-size: 11px; }
+
+    .tab-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      border-bottom: none; border-top: 1px solid #e2e8f0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+      z-index: 100; background: white;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .tab-btn { padding: 8px 4px 10px; font-size: 10px; border-bottom: none; border-top: 3px solid transparent; }
+    .tab-btn.active { border-bottom: none; border-top-color: #FFB500; background: #f0fbff; }
+    .tab-btn .tab-icon { font-size: 18px; margin-bottom: 2px; }
+
+    .tab-content { padding: 14px 14px 100px; }
+    .card { padding: 16px; border-radius: 14px; margin-bottom: 14px; }
+    .card h2 { font-size: 16px; }
+    .form-row.col4 { grid-template-columns: 1fr 1fr; }
+    .form-group input { padding: 13px; font-size: 16px; }
+    .pill { padding: 9px 14px; font-size: 13px; }
+    .price-breakdown { grid-template-columns: 1fr 1fr; }
+    .price-item.total { grid-column: 1 / -1; }
+    .box-result h3 { font-size: 22px; }
+    .btn { padding: 14px 20px; font-size: 15px; }
+
+    /* Settings on phone */
+    .box-table .hide-mobile { display: none; }
+    .pack-price-grid { grid-template-columns: 1fr; }
+    .dm-actions .btn { flex: 1; }
+    .save-bar { position: static; padding: 12px 0 0; flex-wrap: wrap; }
+  }
+
+  @media (max-width: 380px) {
+    .form-row.col4 { grid-template-columns: 1fr 1fr; }
+    .price-breakdown { grid-template-columns: 1fr; }
+    .price-item.total { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Yellow top bar -->
+<div style="background:#FFB500; height:5px; width:100%;"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-logo">UPS<br>STORE</div>
+  <div>
+    <h1>Team Tools</h1>
+    <p>Belgrade, MT &nbsp;·&nbsp; Packing, Building &amp; Print Quoting</p>
+  </div>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('box-finder', this)">
+    <span class="tab-icon">📦</span>Box Finder
+  </button>
+  <button class="tab-btn" onclick="showTab('soon-custom', this)">
+    <span class="tab-icon">✂️</span>Custom Box
+  </button>
+  <button class="tab-btn" onclick="showTab('soon-board', this)">
+    <span class="tab-icon">🔷</span>Blue Board
+  </button>
+  <button class="tab-btn" onclick="showTab('soon-print', this)">
+    <span class="tab-icon">🖨️</span>Print Quote
+  </button>
+  <button class="tab-btn" onclick="showTab('settings', this)">
+    <span class="tab-icon">⚙️</span>Settings
+  </button>
+</div>
+
+<!-- ══════════════ TAB 1 — BOX FINDER ══════════════ -->
+<div id="box-finder" class="tab-content active">
+
+  <!-- Weight-only banners for Tab 1 -->
+  <div class="ups-warning danger" id="warn-weight-surcharge">
+    <div class="warn-icon">⚖️</div>
+    <div class="warn-text">
+      <strong>Over 70 lbs — Additional Handling Surcharge</strong>
+      <span>UPS charges an additional handling fee for packages over 70 lbs. Max weight is 150 lbs.</span>
+    </div>
+  </div>
+
+  <div class="ups-warning overlimit" id="warn-weight-overlimit">
+    <div class="warn-icon">🚫</div>
+    <div class="warn-text">
+      <strong>Exceeds UPS Weight Limit — Cannot Ship</strong>
+      <span>This package exceeds the 150 lb UPS maximum weight and cannot be accepted.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Find the Best Box</h2>
+    <p class="subtitle">Enter item dimensions and select packing level to find the best fit</p>
+
+    <div class="form-row col4">
+      <div class="form-group">
+        <label>Length (in)</label>
+        <input type="number" inputmode="decimal" min="0" step="0.25" id="in-length" placeholder="e.g. 14">
+      </div>
+      <div class="form-group">
+        <label>Width (in)</label>
+        <input type="number" inputmode="decimal" min="0" step="0.25" id="in-width" placeholder="e.g. 10">
+      </div>
+      <div class="form-group">
+        <label>Height (in)</label>
+        <input type="number" inputmode="decimal" min="0" step="0.25" id="in-height" placeholder="e.g. 8">
+      </div>
+      <div class="form-group">
+        <label>Weight (lbs)</label>
+        <input type="number" inputmode="decimal" min="0" step="0.5" id="in-weight" placeholder="e.g. 12">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 18px;">
+      <label>Packing Level</label>
+      <div class="pill-group" id="pack-pills">
+        <div class="pill" data-level="Basic">Basic</div>
+        <div class="pill selected" data-level="Standard">Standard</div>
+        <div class="pill" data-level="Fragile">Fragile</div>
+        <div class="pill" data-level="Custom">Custom</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="find-btn">Find Best Box</button>
+
+    <!-- Empty state -->
+    <div class="result-empty" id="box-empty">
+      <div class="result-icon">📦</div>
+      <p>Enter dimensions and packing level,<br>then tap Find Best Box</p>
+    </div>
+
+    <!-- No match -->
+    <div class="no-match" id="box-no-match">
+      <div class="nm-icon">📭</div>
+      <strong>No stock box fits this item</strong>
+      <span id="no-match-detail"></span>
+    </div>
+
+    <!-- Result -->
+    <div class="box-result" id="box-result">
+      <div class="best-label">✓ Best Match</div>
+
+      <!-- Best-match dims (left) + CMS / shipping dims (top right) -->
+      <div class="res-header">
+        <div class="res-dims" id="res-dims"></div>
+        <div class="cms-dims">
+          <div class="cms-icon">📐</div>
+          <div>
+            <div class="cms-label">CMS / Shipping Dimensions</div>
+            <div class="cms-value" id="res-cms">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="box-cat-tag" id="res-cat"></div>
+      <div class="price-breakdown">
+        <div class="price-item total" style="grid-column:1 / -1;">
+          <div class="pi-label" id="res-pack-label">All-In Price</div>
+          <div class="pi-value" id="res-total">$0.00</div>
+        </div>
+      </div>
+      <div class="fit-note" id="res-fit-note"></div>
+
+      <!-- Heavy advisory -->
+      <div class="heavy-advisory" id="res-heavy" style="display:none;"></div>
+
+      <!-- Alternatives -->
+      <div class="alt-boxes" id="res-alts" style="display:none;">
+        <p>Also fits</p>
+        <div id="res-alt-list"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Coming-soon placeholders (kept for approved 5-tab design; built next) -->
+<div id="soon-custom" class="tab-content">
+  <div class="soon"><div class="soon-icon">✂️</div><h2>Custom Box Builder</h2><p>Building next — not yet available.</p></div>
+</div>
+<div id="soon-board" class="tab-content">
+  <div class="soon"><div class="soon-icon">🔷</div><h2>Blue Board Calculator</h2><p>Building next — not yet available.</p></div>
+</div>
+<div id="soon-print" class="tab-content">
+  <div class="soon"><div class="soon-icon">🖨️</div><h2>Print Quote</h2><p>Building next — not yet available.</p></div>
+</div>
+<div id="settings" class="tab-content">
+
+  <!-- BOX INVENTORY -->
+  <div class="card">
+    <div class="settings-section">
+      <h3>📦 Box Inventory <span class="sec-note">(<span id="inv-count">0</span> boxes · used by Box Finder)</span></h3>
+      <div class="table-wrap">
+        <table class="box-table">
+          <thead>
+            <tr>
+              <th>Dimensions</th>
+              <th class="hide-mobile">Category</th>
+              <th>Box $</th>
+              <th class="hide-mobile">Packing B / S / F / C</th>
+              <th class="hide-mobile">275#</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="inv-tbody"></tbody>
+        </table>
+      </div>
+
+      <button class="btn btn-outline btn-block" style="margin-top:14px;" id="add-box-btn">+ Add New Box</button>
+
+      <div class="add-box-form" id="box-form">
+        <h4 id="box-form-title">Add New Box</h4>
+        <div class="form-row col4">
+          <div class="form-group"><label>Length</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bf-l" placeholder="L"></div>
+          <div class="form-group"><label>Width</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bf-w" placeholder="W"></div>
+          <div class="form-group"><label>Height</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bf-h" placeholder="H"></div>
+          <div class="form-group"><label>Price ($)</label><input type="number" inputmode="decimal" min="0" step="0.01" id="bf-price" placeholder="0.00"></div>
+        </div>
+        <div class="form-row col2">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="bf-cat">
+              <option>Cubed</option>
+              <option>Non-Cubed</option>
+              <option>Art</option>
+              <option>Long</option>
+              <option>White Die Cut</option>
+              <option>Retention</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>275# Heavy Duty?</label>
+            <select id="bf-heavy">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </div>
+        <label style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.6px; display:block; margin:4px 0 8px;">Packing Price by Level ($)</label>
+        <div class="form-row col4">
+          <div class="form-group"><label>Basic</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bf-pb" placeholder="0.00"></div>
+          <div class="form-group"><label>Standard</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bf-ps" placeholder="0.00"></div>
+          <div class="form-group"><label>Fragile</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bf-pf" placeholder="0.00"></div>
+          <div class="form-group"><label>Custom</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bf-pc" placeholder="0.00"></div>
+        </div>
+        <div id="bf-error" style="display:none; color:#dc2626; font-size:13px; margin-bottom:10px; font-weight:600;"></div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" id="box-save-btn">Save Box</button>
+          <button class="btn btn-outline" id="box-cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PACKING LEVELS REFERENCE -->
+  <div class="card">
+    <div class="settings-section">
+      <h3>🧸 Packing Level Cushions <span class="sec-note">(Box Finder)</span></h3>
+      <p class="sec-desc">Cushion added to each side of the item before matching a box — a bigger cushion finds a bigger box. (Packing price comes from each box above.)</p>
+      <div class="pack-price-grid" id="cushion-grid"></div>
+    </div>
+  </div>
+
+  <!-- DATA MANAGEMENT -->
+  <div class="card">
+    <div class="settings-section">
+      <h3>💾 Data Management</h3>
+      <p class="sec-desc">Changes save to this device automatically. Use Export to back up your settings or copy them to another phone or iPad.</p>
+      <div class="dm-actions">
+        <button class="btn btn-outline" id="export-btn">⬇️&nbsp; Export Backup</button>
+        <button class="btn btn-outline" id="import-btn">⬆️&nbsp; Import Backup</button>
+        <button class="btn btn-danger" id="reset-btn">Restore Defaults</button>
+        <input type="file" id="import-file" accept="application/json,.json" style="display:none;">
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-desc" style="text-align:center; margin: 0 0 4px;">Custom Box, Blue Board &amp; Print Quote settings will appear here as those tabs are built.</p>
+
+  <div class="save-bar">
+    <button class="btn btn-primary" style="flex:1;" id="save-all-btn">💾&nbsp; Save All Settings</button>
+    <span class="save-status" id="save-status">Saved ✓</span>
+  </div>
+
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   DATA — each box stores its all-in price per packing
+   level (box + packing, from "Packing Prices.csv").
+   The quote = that level's all-in price. Dimensions are
+   interior. White Die Cut & Retention are all-inclusive,
+   so their price is the box price at every level.
+   Persisted to localStorage; Settings can edit it.
+═══════════════════════════════════════════════════════ */
+const P = (B,S,F,C) => ({ Basic:B, Standard:S, Fragile:F, Custom:C });
+
+const DEFAULT_INVENTORY = [
+  // Cubed
+  { l:6, w:6, h:6, price:3.50, cat:'Cubed', heavy:false, pack:P(6.00,7.25,8.50,10.75) },
+  { l:8, w:8, h:8, price:4.00, cat:'Cubed', heavy:false, pack:P(6.75,8.25,10.25,13.00) },
+  { l:10, w:10, h:10, price:5.75, cat:'Cubed', heavy:false, pack:P(8.75,10.75,13.00,16.75) },
+  { l:12, w:12, h:12, price:6.50, cat:'Cubed', heavy:false, pack:P(9.75,12.00,15.50,20.00) },
+  { l:14, w:14, h:14, price:8.50, cat:'Cubed', heavy:false, pack:P(12.25,15.25,21.50,29.25) },
+  { l:16, w:16, h:16, price:10.50, cat:'Cubed', heavy:false, pack:P(15.00,17.75,27.25,36.25) },
+  { l:18, w:18, h:18, price:11.50, cat:'Cubed', heavy:false, pack:P(16.50,20.25,32.00,42.25) },
+  { l:20, w:20, h:20, price:18.25, cat:'Cubed', heavy:false, pack:P(23.75,28.25,42.75,54.00) },
+  { l:22, w:22, h:22, price:16.00, cat:'Cubed', heavy:false, pack:P(21.50,29.00,44.25,56.75) },
+  { l:24, w:24, h:24, price:22.75, cat:'Cubed', heavy:true , pack:P(28.75,38.50,54.75,68.50) },
+  // Non-Cubed
+  { l:8, w:6, h:6, price:4.75, cat:'Non-Cubed', heavy:false, pack:P(7.25,8.50,9.75,12.00) },
+  { l:10, w:6, h:6, price:5.25, cat:'Non-Cubed', heavy:false, pack:P(7.75,9.00,10.25,12.50) },
+  { l:12, w:12, h:6, price:6.00, cat:'Non-Cubed', heavy:false, pack:P(9.00,11.00,13.25,17.00) },
+  { l:16, w:16, h:4, price:7.25, cat:'Non-Cubed', heavy:false, pack:P(10.25,12.25,14.50,18.25) },
+  { l:12, w:10, h:10, price:6.50, cat:'Non-Cubed', heavy:false, pack:P(9.50,11.50,13.75,17.50) },
+  { l:14, w:10, h:10, price:6.75, cat:'Non-Cubed', heavy:false, pack:P(10.00,12.25,15.75,20.25) },
+  { l:17, w:11, h:8, price:6.75, cat:'Non-Cubed', heavy:false, pack:P(10.00,12.25,15.75,20.25) },
+  { l:15, w:12, h:10, price:7.25, cat:'Non-Cubed', heavy:false, pack:P(10.50,12.75,16.25,20.75) },
+  { l:16, w:14, h:10, price:7.75, cat:'Non-Cubed', heavy:false, pack:P(11.50,14.50,20.75,28.50) },
+  { l:18, w:12, h:12, price:8.50, cat:'Non-Cubed', heavy:false, pack:P(12.25,15.25,21.50,29.25) },
+  { l:20, w:12, h:12, price:8.75, cat:'Non-Cubed', heavy:false, pack:P(12.50,15.50,21.75,29.50) },
+  { l:24, w:12, h:12, price:10.25, cat:'Non-Cubed', heavy:false, pack:P(14.75,17.50,27.00,36.00) },
+  { l:22, w:22, h:8, price:12.75, cat:'Non-Cubed', heavy:false, pack:P(17.25,20.00,29.50,38.50) },
+  { l:18, w:18, h:12, price:11.50, cat:'Non-Cubed', heavy:false, pack:P(16.00,18.75,28.25,37.25) },
+  { l:20, w:16, h:14, price:10.50, cat:'Non-Cubed', heavy:false, pack:P(15.00,17.75,27.25,36.25) },
+  { l:20, w:20, h:12, price:11.25, cat:'Non-Cubed', heavy:false, pack:P(15.75,18.50,28.00,37.00) },
+  { l:24, w:18, h:18, price:14.00, cat:'Non-Cubed', heavy:false, pack:P(19.50,24.00,38.50,49.75) },
+  { l:30, w:17, h:16, price:12.00, cat:'Non-Cubed', heavy:false, pack:P(17.50,22.00,36.50,47.75) },
+  { l:24, w:24, h:16, price:15.25, cat:'Non-Cubed', heavy:false, pack:P(20.75,25.25,39.75,51.00) },
+  { l:36, w:16, h:16, price:14.50, cat:'Non-Cubed', heavy:false, pack:P(20.00,24.50,39.00,50.25) },
+  { l:26, w:20, h:20, price:21.50, cat:'Non-Cubed', heavy:true , pack:P(27.50,37.25,53.50,67.25) },
+  // Long
+  { l:6, w:6, h:48, price:12.25, cat:'Long', heavy:false, pack:P(16.75,19.00,25.75,31.50) },
+  { l:10, w:10, h:48, price:13.50, cat:'Long', heavy:false, pack:P(19.00,22.50,34.50,44.75) },
+  { l:15, w:15, h:48, price:22.25, cat:'Long', heavy:true , pack:P(29.75,38.00,54.25,68.00) },
+  // Art
+  { l:24, w:6, h:18, price:14.00, cat:'Art', heavy:true , pack:P(26.75,26.75,34.25,39.75) },
+  { l:30, w:6, h:24, price:17.50, cat:'Art', heavy:true , pack:P(32.25,32.25,42.75,50.25) },
+  { l:36, w:5.5, h:29, price:25.25, cat:'Art', heavy:true , pack:P(44.50,44.50,57.75,67.25) },
+  { l:35, w:5.5, h:44, price:32.75, cat:'Art', heavy:true , pack:P(55.50,55.50,72.75,83.75) },
+  // White Die Cut — all-in price = box price (occasional packing add-on not modeled)
+  { l:9,  w:6,  h:3,   price:4.25,  cat:'White Die Cut', heavy:false, pack:P(4.25,4.25,4.25,4.25) },
+  { l:12, w:9,  h:4,   price:6.25,  cat:'White Die Cut', heavy:false, pack:P(6.25,6.25,6.25,6.25) },
+  { l:13, w:13, h:4,   price:6.75,  cat:'White Die Cut', heavy:false, pack:P(6.75,6.75,6.75,6.75) },
+  { l:17, w:11, h:3,   price:6.50,  cat:'White Die Cut', heavy:false, pack:P(6.50,6.50,6.50,6.50) },
+  { l:19, w:12, h:3,   price:6.75,  cat:'White Die Cut', heavy:false, pack:P(6.75,6.75,6.75,6.75) },
+  // Retention — all-inclusive price (same whether packed or not)
+  { l:10, w:5,  h:2.5, price:7.25,  cat:'Retention', heavy:false, pack:P(7.25,7.25,7.25,7.25) },
+  { l:12, w:9,  h:3,   price:9.75,  cat:'Retention', heavy:false, pack:P(9.75,9.75,9.75,9.75) },
+  { l:18, w:16, h:4,   price:17.95, cat:'Retention', heavy:false, pack:P(17.95,17.95,17.95,17.95) },
+];
+
+// Default cushion per side — editable in Settings, persisted to localStorage.
+const DEFAULT_CUSHION = { Basic:0, Standard:1.5, Fragile:2, Custom:3 };
+// Boxes that can be trimmed shorter (in 2" steps, min 4" final height).
+const CUTTABLE = { 'Cubed': true, 'Non-Cubed': true, 'Long': true };
+const CUT_STEP = 2, CUT_MIN_HEIGHT = 4;
+const PACK_LEVELS = ['Basic','Standard','Fragile','Custom'];
+
+const CAT_TAG = {
+  'Cubed':'tag-green', 'Non-Cubed':'tag-blue', 'Art':'tag-gray',
+  'Long':'tag-purple', 'White Die Cut':'tag-gray', 'Retention':'tag-amber'
+};
+
+// Bump when the data shape changes so stale cached inventory is replaced.
+const DATA_VERSION = 3;
+
+// Storage helpers that NEVER throw. iOS Safari throws a SecurityError when
+// localStorage is touched on a file:// page (AirDropped file) or in Private
+// Mode — an unguarded read here would abort the whole script and "break" the app.
+function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+function safeSet(key, val) { try { localStorage.setItem(key, val); } catch (e) {} }
+function loadJSON(key, fallback) {
+  try { const v = safeGet(key); return v ? JSON.parse(v) : fallback; }
+  catch (e) { return fallback; }
+}
+
+// Load saved inventory only if it matches the current schema (has per-box packing prices).
+let INVENTORY = null;
+if (safeGet('ups.dataVersion') === String(DATA_VERSION)) {
+  INVENTORY = loadJSON('ups.inventory', null);
+}
+if (!Array.isArray(INVENTORY) || !INVENTORY.length || !INVENTORY[0].pack) {
+  INVENTORY = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+}
+function persistVersion() { safeSet('ups.dataVersion', String(DATA_VERSION)); }
+safeSet('ups.inventory', JSON.stringify(INVENTORY));
+persistVersion();
+
+// Editable packing-level cushions (per side, inches).
+let CUSHION = Object.assign({}, DEFAULT_CUSHION, loadJSON('ups.cushion', {}));
+function persistCushion() { safeSet('ups.cushion', JSON.stringify(CUSHION)); }
+
+/* ════════════════ HELPERS ════════════════ */
+const $ = id => document.getElementById(id);
+const money = n => '$' + n.toFixed(2);
+function fmt(n) {                    // tidy number: 5.5 stays, 6.0 -> 6
+  return Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100);
+}
+function dimsStr(a, b, c) { return `${fmt(a)} × ${fmt(b)} × ${fmt(c)}`; }
+
+let selectedLevel = 'Standard';
+
+/* ════════════════ MATCHING LOGIC ════════════════
+   1. padded_dim = item_dim + cushion×2 (each side)
+   2. A box fits if its base (L×W) holds two padded dims and its height holds
+      the third. Cubed / Non-Cubed / Long boxes can be CUT DOWN: the height
+      (box.h) trimmed in 2" steps, never below 4". The base is never cut.
+   3. Match the L×W FOOTPRINT first — smallest base that fits — then trim the
+      height. Long & Art (oversized specialty) boxes are a fallback, used only
+      when no normal box fits (so a 48" tube isn't trimmed to 8" when a cube
+      would do). Tie-break by smaller original box, then lower price.
+   4. Best + up to 3 alternatives.
+*/
+
+// Smallest height a cuttable wall can be trimmed to while still ≥ need.
+// Achievable heights are H, H-2, H-4, … and never below CUT_MIN_HEIGHT.
+function trimHeight(H, need) {
+  const bound = Math.max(need, CUT_MIN_HEIGHT);
+  if (bound > H) return null;                       // can't fit even uncut
+  const k = Math.floor((H - bound) / CUT_STEP);     // most 2" cuts we can make
+  return H - CUT_STEP * k;                          // smallest reachable ≥ bound
+}
+
+// How this box can hold the padded item, with the smallest base footprint.
+// Returns { dims:[a,b,c] desc, footArea, finH, cut:{from,to}|null } or null.
+// Physical model: only the HEIGHT (box.h) can be trimmed; the base (L×W) is fixed.
+function fitBox(box, padded) {
+  let best = null;
+  const consider = (baseW, baseL, finH, cut) => {
+    const footArea = baseW * baseL;
+    if (!best || footArea < best.footArea || (footArea === best.footArea && finH < best.finH)) {
+      best = { dims: [baseW, baseL, finH].sort((a, b) => b - a), footArea, finH, cut };
+    }
+  };
+
+  if (CUTTABLE[box.cat]) {
+    // Base fixed = L×W; stand a padded dim up and trim the height to it.
+    const base = [box.l, box.w].sort((a, b) => b - a);
+    const H = box.h;
+    for (let p = 0; p < 3; p++) {                       // which padded dim stands vertical
+      const vNeed = padded[p];
+      const rest = padded.filter((_, i) => i !== p).sort((a, b) => b - a);
+      if (base[0] >= rest[0] && base[1] >= rest[1] && H >= vNeed) {
+        const to = trimHeight(H, vNeed);
+        consider(box.l, box.w, to, to < H ? { from: H, to } : null);
+      }
+    }
+  } else {
+    // Rigid box (no cutting): fits in any orientation; lay it on its largest face.
+    const bd = [box.l, box.w, box.h].sort((a, b) => b - a);
+    if (bd[0] >= padded[0] && bd[1] >= padded[1] && bd[2] >= padded[2]) {
+      consider(bd[0], bd[1], bd[2], null);
+    }
+  }
+  return best;
+}
+
+function findBoxes(L, W, H, level) {
+  const cushion = CUSHION[level];
+  const padded = [L, W, H].map(d => d + cushion * 2).sort((a, b) => b - a);
+  const matches = [];
+  for (const box of INVENTORY) {
+    if (typeof box.price !== 'number' || isNaN(box.price)) continue; // no price -> not quotable
+    const fit = fitBox(box, padded);
+    if (fit) matches.push({
+      box, dims: fit.dims, cut: fit.cut, footArea: fit.footArea,
+      origVol: box.l * box.w * box.h,
+      // Long & Art are oversized specialty boxes — fall back to them only if nothing normal fits.
+      specialty: (box.cat === 'Long' || box.cat === 'Art') ? 1 : 0
+    });
+  }
+  // Normal boxes first, by smallest L×W footprint; specialty (Long/Art) only as a
+  // fallback; then smaller original box, then lower price.
+  matches.sort((a, b) =>
+    (a.specialty - b.specialty) ||
+    (a.footArea - b.footArea) ||
+    (a.origVol - b.origVol) ||
+    (a.box.pack[level] - b.box.pack[level])
+  );
+  return { padded, cushion, matches };
+}
+
+/* ════════════════ RENDER ════════════════ */
+function readDims() {
+  const L = parseFloat($('in-length').value);
+  const W = parseFloat($('in-width').value);
+  const H = parseFloat($('in-height').value);
+  const wRaw = $('in-weight').value.trim();
+  const weight = wRaw === '' ? null : parseFloat(wRaw);
+  return { L, W, H, weight };
+}
+
+function updateWeightBanners(weight) {
+  const surcharge = weight !== null && !isNaN(weight) && weight > 70 && weight <= 150;
+  const overlimit = weight !== null && !isNaN(weight) && weight > 150;
+  $('warn-weight-surcharge').classList.toggle('show', surcharge);
+  $('warn-weight-overlimit').classList.toggle('show', overlimit);
+}
+
+function find() {
+  const { L, W, H, weight } = readDims();
+
+  // Validate dimensions
+  const fields = [['in-length', L], ['in-width', W], ['in-height', H]];
+  let valid = true;
+  fields.forEach(([id, v]) => {
+    const bad = isNaN(v) || v <= 0;
+    $(id).classList.toggle('invalid', bad);
+    if (bad) valid = false;
+  });
+
+  updateWeightBanners(weight);
+
+  if (!valid) {
+    $('box-result').classList.remove('show');
+    $('box-no-match').classList.remove('show');
+    $('box-empty').style.display = 'block';
+    return;
+  }
+
+  const { padded, cushion, matches } = findBoxes(L, W, H, selectedLevel);
+  $('box-empty').style.display = 'none';
+
+  if (matches.length === 0) {
+    $('box-result').classList.remove('show');
+    $('box-no-match').classList.add('show');
+    $('no-match-detail').textContent =
+      `With ${selectedLevel} packing the item needs at least ` +
+      `${dimsStr(padded[0], padded[1], padded[2])} of interior space. ` +
+      `Consider a Custom Box.`;
+    return;
+  }
+
+  $('box-no-match').classList.remove('show');
+  renderResult(matches, selectedLevel, weight, padded);
+  $('box-result').classList.add('show');
+}
+
+function renderResult(matches, level, weight, padded) {
+  const best = matches[0];
+  const b = best.box;
+  const total = b.pack[level];   // all-in price (box included) for this level
+
+  // Full box size (what to pull & charge) and finished size after cutting the HEIGHT only.
+  const fullDims = dimsStr(b.l, b.w, b.h);
+  const finishedH = best.cut ? best.cut.to : b.h;
+  const finishedDims = dimsStr(b.l, b.w, finishedH);
+
+  if (best.cut) {
+    $('res-dims').innerHTML =
+      `<div class="cut-display">` +
+        `<div class="dim-block"><span class="dim-cap">Box to pull &amp; charge</span><span class="dim-main">${fullDims}</span></div>` +
+        `<span class="cut-sep">✂️</span>` +
+        `<div class="dim-block"><span class="dim-cap">After cut-down</span><span class="dim-main cut">${finishedDims}</span></div>` +
+      `</div>`;
+  } else {
+    $('res-dims').innerHTML = `<span class="dim-single">${fullDims}</span>`;
+  }
+
+  // Category + 275# badges
+  const tagClass = CAT_TAG[b.cat] || 'tag-gray';
+  $('res-cat').innerHTML =
+    `<span class="tag ${tagClass}">${b.cat}</span>` +
+    (b.heavy ? `<span class="tag tag-275">275#</span>` : '');
+
+  // Single all-in price for the selected level (charged on the FULL box)
+  $('res-pack-label').textContent = `${level} Packing — All-In Price`;
+  $('res-total').textContent = money(total);
+
+  // Fit note — cushion, plus height-only cut instruction or extra room
+  const cushion = CUSHION[level];
+  let note = cushion > 0
+    ? `${level} packing · ${fmt(cushion)}" cushion per side`
+    : `${level} packing · no cushion (snug fit)`;
+  if (best.cut) {
+    note += ` · Cut height from ${fmt(best.cut.from)}" to ${fmt(best.cut.to)}" (trim ${fmt(best.cut.from - best.cut.to)}") — charge the full ${fullDims} box in POS`;
+  } else {
+    const extra = Math.max(b.l, b.w, b.h) - padded[0];
+    note += ` · ${fmt(Math.round(extra * 100) / 100)}" extra room on longest side`;
+  }
+  $('res-fit-note').textContent = note;
+
+  // CMS / shipping dims = finished (cut) box + 1" each
+  $('res-cms').textContent = dimsStr(b.l + 1, b.w + 1, finishedH + 1);
+
+  // Heavy item advisory (≥ 40 lbs)
+  const heavyEl = $('res-heavy');
+  if (weight !== null && !isNaN(weight) && weight >= 40) {
+    heavyEl.style.display = 'block';
+    heavyEl.innerHTML =
+      `⚠️ &nbsp;<strong>${fmt(weight)} lbs — heavy item.</strong> ` +
+      `Use <strong>Custom</strong> packing level and reinforce box with blue board, ` +
+      `or upgrade to a 275# box if one fits.`;
+  } else {
+    heavyEl.style.display = 'none';
+  }
+
+  // Alternatives (up to 3)
+  const alts = matches.slice(1, 4);
+  const altsWrap = $('res-alts');
+  if (alts.length) {
+    altsWrap.style.display = 'block';
+    $('res-alt-list').innerHTML = alts.map(m => {
+      const mb = m.box;
+      const full = dimsStr(mb.l, mb.w, mb.h);
+      const label = m.cut ? `${full} ✂️ ${dimsStr(mb.l, mb.w, m.cut.to)}` : full;
+      return `<div class="alt-box-row">
+        <span>${label}</span>
+        <span class="alt-meta">${money(mb.pack[level])} all-in</span>
+      </div>`;
+    }).join('');
+  } else {
+    altsWrap.style.display = 'none';
+  }
+}
+
+/* ════════════════ UI WIRING ════════════════ */
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  $(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// Packing pills
+$('pack-pills').addEventListener('click', e => {
+  const pill = e.target.closest('.pill');
+  if (!pill) return;
+  document.querySelectorAll('#pack-pills .pill').forEach(p => p.classList.remove('selected'));
+  pill.classList.add('selected');
+  selectedLevel = pill.dataset.level;
+  if ($('box-result').classList.contains('show') || $('box-no-match').classList.contains('show')) find();
+});
+
+$('find-btn').addEventListener('click', find);
+
+// Recalculate live once a result is on screen
+['in-length', 'in-width', 'in-height', 'in-weight'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    $(id).classList.remove('invalid');
+    if ($('box-result').classList.contains('show') || $('box-no-match').classList.contains('show')) find();
+  });
+});
+
+// Enter key submits
+document.querySelectorAll('#box-finder input').forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { inp.blur(); find(); } });
+});
+
+/* ════════════════════════════════════════════════════
+   SETTINGS — Box Inventory CRUD, Packing Prices, Backup.
+   All edits persist to localStorage immediately and the
+   Box Finder reads the same INVENTORY (with per-box packing prices) live.
+═══════════════════════════════════════════════════════ */
+const CAT_ORDER = ['Cubed', 'Non-Cubed', 'Art', 'Long', 'White Die Cut', 'Retention'];
+
+function persistInventory()  { safeSet('ups.inventory', JSON.stringify(INVENTORY)); persistVersion(); }
+
+function sortInventory() {
+  INVENTORY.sort((a, b) => {
+    const c = CAT_ORDER.indexOf(a.cat) - CAT_ORDER.indexOf(b.cat);
+    return c !== 0 ? c : (a.l * a.w * a.h) - (b.l * b.w * b.h);
+  });
+}
+
+let saveTimer = null;
+function flashSaved(msg) {
+  persistInventory();
+  persistCushion();
+  const el = $('save-status');
+  el.textContent = msg || 'Saved ✓';
+  el.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+/* ---- Inventory table ---- */
+function renderInventory() {
+  $('inv-tbody').innerHTML = INVENTORY.map((b, i) => `
+    <tr>
+      <td><strong>${fmt(b.l)}×${fmt(b.w)}×${fmt(b.h)}</strong></td>
+      <td class="hide-mobile"><span class="tag ${CAT_TAG[b.cat] || 'tag-gray'}">${b.cat}</span></td>
+      <td class="td-price">${money(b.price)}</td>
+      <td class="hide-mobile" style="font-size:12px; color:#64748b; white-space:nowrap;">${PACK_LEVELS.map(L => '$' + b.pack[L].toFixed(2)).join(' / ')}</td>
+      <td class="hide-mobile">${b.heavy ? '<span class="tag tag-amber">275#</span>' : '—'}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-sm btn-outline" data-edit="${i}">Edit</button>
+        <button class="btn btn-sm btn-danger" data-del="${i}">✕</button>
+      </div></td>
+    </tr>`).join('');
+  $('inv-count').textContent = INVENTORY.length;
+}
+
+/* ---- Add / Edit form ---- */
+let editIndex = null;
+function openBoxForm(i) {
+  editIndex = (typeof i === 'number') ? i : null;
+  $('bf-error').style.display = 'none';
+  if (editIndex !== null) {
+    const b = INVENTORY[editIndex];
+    $('bf-l').value = fmt(b.l); $('bf-w').value = fmt(b.w); $('bf-h').value = fmt(b.h);
+    $('bf-price').value = b.price; $('bf-cat').value = b.cat; $('bf-heavy').value = String(b.heavy);
+    $('bf-pb').value = b.pack.Basic; $('bf-ps').value = b.pack.Standard;
+    $('bf-pf').value = b.pack.Fragile; $('bf-pc').value = b.pack.Custom;
+    $('box-form-title').textContent = 'Edit Box';
+    $('box-save-btn').textContent = 'Update Box';
+  } else {
+    $('bf-l').value = $('bf-w').value = $('bf-h').value = $('bf-price').value = '';
+    $('bf-pb').value = $('bf-ps').value = $('bf-pf').value = $('bf-pc').value = '';
+    $('bf-cat').value = 'Cubed'; $('bf-heavy').value = 'false';
+    $('box-form-title').textContent = 'Add New Box';
+    $('box-save-btn').textContent = 'Save Box';
+  }
+  $('box-form').classList.add('show');
+  $('box-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function closeBoxForm() { $('box-form').classList.remove('show'); editIndex = null; }
+function saveBox() {
+  const l = parseFloat($('bf-l').value), w = parseFloat($('bf-w').value),
+        h = parseFloat($('bf-h').value), price = parseFloat($('bf-price').value);
+  const cat = $('bf-cat').value, heavy = $('bf-heavy').value === 'true';
+  const pk = { Basic: parseFloat($('bf-pb').value), Standard: parseFloat($('bf-ps').value),
+               Fragile: parseFloat($('bf-pf').value), Custom: parseFloat($('bf-pc').value) };
+  const badDims = [l, w, h].some(v => isNaN(v) || v <= 0) || isNaN(price) || price < 0;
+  const badPack = PACK_LEVELS.some(L => isNaN(pk[L]) || pk[L] < 0);
+  if (badDims || badPack) {
+    const e = $('bf-error');
+    e.style.display = 'block';
+    e.textContent = badPack
+      ? 'Enter a packing price (0 or more) for every level.'
+      : 'Enter valid dimensions (greater than 0) and a box price (0 or more).';
+    return;
+  }
+  const box = { l, w, h, price, cat, heavy, pack: pk };
+  if (editIndex !== null) INVENTORY[editIndex] = box; else INVENTORY.push(box);
+  sortInventory(); persistInventory(); renderInventory(); closeBoxForm(); flashSaved();
+}
+function deleteBox(i) {
+  const b = INVENTORY[i];
+  if (confirm(`Delete ${fmt(b.l)}×${fmt(b.w)}×${fmt(b.h)} from inventory?`)) {
+    INVENTORY.splice(i, 1); persistInventory(); renderInventory(); flashSaved();
+  }
+}
+
+/* ---- Editable packing-level cushions ---- */
+function renderCushion() {
+  $('cushion-grid').innerHTML = PACK_LEVELS.map(lv => `
+    <div class="pack-price-item">
+      <div><div class="ppi-label">${lv}</div><div class="ppi-sub">inches per side</div></div>
+      <div class="ppi-input"><input type="number" inputmode="decimal" min="0" step="0.25" data-level="${lv}" value="${CUSHION[lv]}">"</div>
+    </div>`).join('');
+}
+
+/* ---- Backup / restore ---- */
+function exportBackup() {
+  const data = { app: 'ups-team-tools', section: 'box-finder', version: DATA_VERSION,
+                 exportedAt: new Date().toISOString(), inventory: INVENTORY, cushion: CUSHION };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ups-team-tools-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+}
+function importBackup(file) {
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!Array.isArray(d.inventory)) throw new Error('No box inventory found in this file.');
+      const cleaned = d.inventory.map(b => {
+        const pk = b.pack && PACK_LEVELS.every(L => !isNaN(+b.pack[L]))
+          ? { Basic: +b.pack.Basic, Standard: +b.pack.Standard, Fragile: +b.pack.Fragile, Custom: +b.pack.Custom }
+          : null;
+        return { l: +b.l, w: +b.w, h: +b.h, price: +b.price, cat: b.cat, heavy: !!b.heavy, pack: pk };
+      }).filter(b => b.l > 0 && b.w > 0 && b.h > 0 && !isNaN(b.price) && b.pack);
+      if (!cleaned.length) throw new Error('No valid boxes with packing prices in this file.');
+      INVENTORY = cleaned;
+      if (d.cushion) CUSHION = Object.assign({}, DEFAULT_CUSHION, d.cushion);
+      sortInventory(); persistInventory(); persistCushion();
+      renderInventory(); renderCushion();
+      alert(`Imported ${INVENTORY.length} boxes successfully.`);
+    } catch (err) {
+      alert('Could not import backup: ' + err.message);
+    }
+  };
+  r.readAsText(file);
+}
+function restoreDefaults() {
+  if (!confirm('Restore the original box list, packing prices, and cushions? This replaces your current settings on this device.')) return;
+  INVENTORY = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
+  CUSHION = Object.assign({}, DEFAULT_CUSHION);
+  sortInventory(); persistInventory(); persistCushion();
+  renderInventory(); renderCushion();
+  flashSaved('Defaults restored ✓');
+}
+
+/* ---- Wiring ---- */
+$('add-box-btn').addEventListener('click', () => openBoxForm());
+$('box-cancel-btn').addEventListener('click', closeBoxForm);
+$('box-save-btn').addEventListener('click', saveBox);
+$('inv-tbody').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]'), dl = e.target.closest('[data-del]');
+  if (ed) openBoxForm(+ed.dataset.edit);
+  else if (dl) deleteBox(+dl.dataset.del);
+});
+$('cushion-grid').addEventListener('input', e => {
+  const inp = e.target.closest('input[data-level]');
+  if (!inp) return;
+  const v = parseFloat(inp.value);
+  if (!isNaN(v) && v >= 0) {
+    CUSHION[inp.dataset.level] = v;
+    persistCushion(); flashSaved();
+    if ($('box-result').classList.contains('show') || $('box-no-match').classList.contains('show')) find();
+  }
+});
+$('export-btn').addEventListener('click', exportBackup);
+$('import-btn').addEventListener('click', () => $('import-file').click());
+$('import-file').addEventListener('change', e => { if (e.target.files[0]) importBackup(e.target.files[0]); e.target.value = ''; });
+$('reset-btn').addEventListener('click', restoreDefaults);
+$('save-all-btn').addEventListener('click', () => flashSaved());
+
+// Initial settings render
+sortInventory();
+renderInventory();
+renderCushion();
+
+/* Register the service worker for offline use (only works over http/https, e.g. GitHub Pages). */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {/* offline cache unavailable — app still runs */});
+  });
+}
+</script>
+</body>
+</html>
