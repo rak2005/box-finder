@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Team Tools">
+<meta name="apple-mobile-web-app-title" content="Packing Tools">
 
 <!-- PWA manifest + home-screen icon -->
 <link rel="manifest" href="manifest.json">
@@ -424,8 +424,7 @@
 <div class="header">
   <div class="header-logo">UPS<br>STORE</div>
   <div>
-    <h1>Team Tools</h1>
-    <p>Belgrade, MT &nbsp;·&nbsp; Packing, Building &amp; Print Quoting</p>
+    <h1>Packing Tools</h1>
   </div>
 </div>
 
@@ -469,7 +468,6 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
       <div>
         <h2>Find the Best Box</h2>
-        <p class="subtitle">Enter item dimensions and select packing level to find the best fit</p>
       </div>
       <div class="hdr-actions">
         <select class="hist-sel" id="hist-bf" style="display:none;"></select>
@@ -602,7 +600,6 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
       <div>
         <h2>Custom Box Builder</h2>
-        <p class="subtitle">Enter dimensions in any order — they're sorted automatically. Generates a price and a cut &amp; fold diagram from a 50&quot; × 80&quot; sheet.</p>
       </div>
       <div class="hdr-actions">
         <select class="hist-sel" id="hist-cb" style="display:none;"></select>
@@ -676,7 +673,6 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
       <div>
         <h2>Blue Board Panel Calculator</h2>
-        <p class="subtitle">Enter the box inside dimensions (any order). Calculates the 6 reinforcement panels and a cut layout on 48&quot; × 96&quot; sheets that maximizes the largest reusable leftover.</p>
       </div>
       <div class="hdr-actions">
         <select class="hist-sel" id="hist-bb" style="display:none;"></select>
@@ -905,7 +901,7 @@ const DEFAULT_INVENTORY = [
 
 // Default cushion per side — editable in Settings, persisted to localStorage.
 // Blue Board (≈ board thickness) is editable too; Box Only is always 0 (build to size).
-const DEFAULT_CUSHION = { Basic:0, Standard:1.5, Fragile:2, Custom:3, 'Blue Board':1 };
+const DEFAULT_CUSHION = { Basic:0, Standard:1.5, Fragile:2, Custom:3, 'Blue Board':3 };
 const CUSHION_KEYS = ['Basic', 'Standard', 'Fragile', 'Custom', 'Blue Board'];
 // Boxes that can be trimmed shorter (in 2" steps, min 4" final height).
 const CUTTABLE = { 'Cubed': true, 'Non-Cubed': true, 'Long': true };
@@ -951,11 +947,21 @@ function persistCushion() { safeSet('ups.cushion', JSON.stringify(CUSHION)); }
 const CB_LEVELS = ['Basic', 'Standard', 'Fragile', 'Custom', 'Blue Board', 'Box Only'];
 // 'Box Only 2-Part' isn't a pill — it's the rate used automatically when a Box Only
 // job comes out as a two-part box (more material/labor than a single-part box).
-const DEFAULT_MULTIPLIERS = { Basic:0.65, Standard:0.75, Fragile:0.90, Custom:1.10, 'Box Only':0.50, 'Box Only 2-Part':0.75, 'Blue Board':1.30 };
+const DEFAULT_MULTIPLIERS = { Basic:0.55, Standard:0.70, Fragile:0.90, Custom:1.20, 'Box Only':0.40, 'Box Only 2-Part':0.50, 'Blue Board':1.50 };
 const MULT_KEYS = ['Basic', 'Standard', 'Fragile', 'Custom', 'Blue Board', 'Box Only', 'Box Only 2-Part'];
 const MULT_LABEL = { 'Box Only': '1 Part — Box Only', 'Box Only 2-Part': '2 Part — Box Only' };
 let MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS, loadJSON('ups.multipliers', {}));
 function persistMultipliers() { safeSet('ups.multipliers', JSON.stringify(MULTIPLIERS)); }
+
+// One-time: re-apply the official multiplier + cushion defaults from the Box Building
+// Guidelines (overriding any previously-saved placeholder values). Box inventory is untouched.
+const PRICING_DEFAULTS_VERSION = '2026-06-guidelines-2';
+if (safeGet('ups.pricingDefaultsV') !== PRICING_DEFAULTS_VERSION) {
+  MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS);
+  CUSHION = Object.assign({}, DEFAULT_CUSHION);
+  persistMultipliers(); persistCushion();
+  safeSet('ups.pricingDefaultsV', PRICING_DEFAULTS_VERSION);
+}
 
 // Multiplier for a level given the resulting layout type ('single' | 'two' | 'infeasible').
 function cbMultiplier(level, layoutType) {
