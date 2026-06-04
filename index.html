@@ -77,6 +77,11 @@
     border-left: 4px solid transparent;
   }
   .ups-warning.show { display: flex; }
+  .ups-warning.caution   { background: #fffbeb; border: 1px solid #fde68a; border-left: 4px solid #f59e0b; }
+  .ups-warning.girth-red { background: #fef2f2; border: 2px solid #ef4444; border-left: 6px solid #ef4444; }
+  .ups-warning.girth-red .warn-icon { font-size: 26px; }
+  .ups-warning.girth-red .warn-text strong { font-size: 16px; color: #b91c1c; }
+  .ups-warning.girth-red .warn-text span { font-size: 13px; color: #b91c1c; opacity: 1; }
   .ups-warning.danger    { background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316; }
   .ups-warning.overlimit { background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #ef4444; }
   .ups-warning .warn-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
@@ -126,6 +131,7 @@
     letter-spacing: -0.2px;
   }
   .btn-primary { background: linear-gradient(135deg, #009CBD 0%, #007a9e 100%); color: white; box-shadow: 0 2px 8px rgba(0,156,189,0.25); }
+  .btn-gold    { background: linear-gradient(135deg, #FFB500 0%, #f0a800 100%); color: #007a9e; box-shadow: 0 2px 8px rgba(255,181,0,0.3); }
   .btn-block   { width: 100%; }
   .btn-primary:active { transform: scale(0.98); opacity: 0.95; }
 
@@ -219,6 +225,7 @@
     background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316;
     border-radius: 8px; font-size: 13px; color: #9a3412;
   }
+  .heavy-advisory.over { background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #ef4444; color: #b91c1c; }
 
   .tag {
     display: inline-block; padding: 2px 8px; border-radius: 6px;
@@ -240,7 +247,69 @@
   .soon h2 { font-size: 18px; color: #475569; margin-bottom: 6px; }
   .soon p { font-size: 14px; }
 
+  /* ── HISTORY ── */
+  .hdr-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .hist-sel { padding: 7px 26px 7px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; font-weight: 600; color: #475569; background-color: #f8fafc; -webkit-appearance: none; max-width: 150px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; }
+  .hist-sel:focus { outline: none; border-color: #009CBD; }
+
+  /* ── CUSTOM BOX ── */
+  .dimtype-hint { font-size: 12px; color: #94a3b8; margin-top: 5px; }
+  .cb-heavy { display: flex; align-items: center; gap: 10px; background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #f97316; border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; }
+  .cb-heavy .cbh-icon { font-size: 20px; flex-shrink: 0; }
+  .cb-heavy .cbh-text { flex: 1; font-size: 13px; color: #9a3412; font-weight: 600; }
+  .cb-heavy .btn { flex-shrink: 0; }
+  .custom-price-result {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef9c3 100%);
+    border: 1.5px solid #fde68a; border-radius: 12px;
+    padding: 16px; margin-top: 14px; display: none;
+    align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .custom-price-result.show { display: flex; }
+  .custom-price-result .cpr-label { font-size: 13px; color: #92400e; font-weight: 700; }
+  .custom-price-result .cpr-formula { font-size: 12px; color: #a16207; margin-top: 3px; }
+  .custom-price-result .cpr-price { font-size: 36px; font-weight: 800; color: #009CBD; letter-spacing: -1px; }
+  .diagram-wrap { margin-top: 16px; display: none; }
+  .diagram-wrap.show { display: block; }
+  .diagram-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 6px; }
+  .diagram-area { width: 100%; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 8px; }
+  .diagram-area svg { width: 100%; height: auto; display: block; }
+  .diagram-legend { display: flex; gap: 20px; margin-top: 10px; font-size: 13px; color: #555; flex-wrap: wrap; }
+  .diagram-note { font-size: 12px; color: #64748b; margin-top: 8px; line-height: 1.5; background: #f0fbff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 8px 12px; }
+  .not-feasible { display: none; margin-top: 14px; padding: 16px; border-radius: 12px; background: #fef2f2; border: 1.5px solid #fecaca; color: #b91c1c; font-size: 14px; text-align: center; }
+  .not-feasible.show { display: block; }
+
+  /* ── BLUE BOARD ── */
+  .bb-result { display: none; margin-top: 16px; }
+  .bb-result.show { display: block; }
+  .bb-panels { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .bb-panel { border-radius: 12px; padding: 12px; text-align: center; border: 1.5px solid; }
+  .bb-panel.tb    { background: #eff6ff; border-color: #93c5fd; }
+  .bb-panel.long  { background: #ecfdf5; border-color: #6ee7b7; }
+  .bb-panel.short { background: #fff7ed; border-color: #fdba74; }
+  .bb-panel .bp-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+  .bb-panel.tb .bp-name { color: #1d4ed8; }
+  .bb-panel.long .bp-name { color: #0f6e56; }
+  .bb-panel.short .bp-name { color: #993c1d; }
+  .bb-panel .bp-size { font-size: 21px; font-weight: 800; color: #1a1a2e; margin-top: 3px; letter-spacing: -0.5px; }
+  .bb-panel .bp-qty { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .bb-summary { background: #f0fbff; border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 12px 14px; font-size: 13px; color: #0c4a6e; margin-bottom: 14px; line-height: 1.6; }
+  .bb-summary strong { color: #1a1a2e; }
+  .bb-sheets { display: flex; flex-wrap: wrap; gap: 16px; }
+  .bb-sheet { flex: 1; min-width: 220px; }
+  .bb-sheet .bb-sheet-title { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .bb-sheet svg { width: 100%; height: auto; max-width: 320px; display: block; }
+
   /* ── SETTINGS ── */
+  .set-nav { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 16px; -webkit-overflow-scrolling: touch; }
+  .set-nav-btn {
+    flex: 0 0 auto; padding: 9px 16px; border: 1.5px solid #e2e8f0; background: white;
+    border-radius: 22px; font-size: 13px; font-weight: 700; color: #475569; cursor: pointer;
+    white-space: nowrap; transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .set-nav-btn:hover { border-color: #009CBD; color: #009CBD; }
+  .set-nav-btn.active { background: #009CBD; border-color: #009CBD; color: white; box-shadow: 0 2px 8px rgba(0,156,189,0.2); }
+  .set-section { display: none; }
+  .set-section.active { display: block; }
   .settings-section h3 {
     font-size: 12px; font-weight: 700; color: #009CBD;
     text-transform: uppercase; letter-spacing: 1px;
@@ -365,14 +434,11 @@
   <button class="tab-btn active" onclick="showTab('box-finder', this)">
     <span class="tab-icon">📦</span>Box Finder
   </button>
-  <button class="tab-btn" onclick="showTab('soon-custom', this)">
+  <button class="tab-btn" onclick="showTab('custom-box', this)">
     <span class="tab-icon">✂️</span>Custom Box
   </button>
-  <button class="tab-btn" onclick="showTab('soon-board', this)">
+  <button class="tab-btn" onclick="showTab('blue-board', this)">
     <span class="tab-icon">🔷</span>Blue Board
-  </button>
-  <button class="tab-btn" onclick="showTab('soon-print', this)">
-    <span class="tab-icon">🖨️</span>Print Quote
   </button>
   <button class="tab-btn" onclick="showTab('settings', this)">
     <span class="tab-icon">⚙️</span>Settings
@@ -400,8 +466,16 @@
   </div>
 
   <div class="card">
-    <h2>Find the Best Box</h2>
-    <p class="subtitle">Enter item dimensions and select packing level to find the best fit</p>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+      <div>
+        <h2>Find the Best Box</h2>
+        <p class="subtitle">Enter item dimensions and select packing level to find the best fit</p>
+      </div>
+      <div class="hdr-actions">
+        <select class="hist-sel" id="hist-bf" style="display:none;"></select>
+        <button class="btn btn-sm btn-outline" id="clear-btn" type="button">Clear</button>
+      </div>
+    </div>
 
     <div class="form-row col4">
       <div class="form-group">
@@ -485,17 +559,168 @@
 </div>
 
 <!-- Coming-soon placeholders (kept for approved 5-tab design; built next) -->
-<div id="soon-custom" class="tab-content">
-  <div class="soon"><div class="soon-icon">✂️</div><h2>Custom Box Builder</h2><p>Building next — not yet available.</p></div>
+<div id="custom-box" class="tab-content">
+
+  <!-- Size + weight banners -->
+  <div class="ups-warning girth-red" id="cb-warn-girth-red">
+    <div class="warn-icon">🚨</div>
+    <div class="warn-text"><strong>GIRTH OVER 165" — TOO LARGE</strong>
+      <span id="cb-girth-red-txt"></span></div>
+  </div>
+  <div class="ups-warning caution" id="cb-warn-girth-yellow">
+    <div class="warn-icon">⚠️</div>
+    <div class="warn-text"><strong>Large Girth</strong>
+      <span id="cb-girth-yellow-txt"></span></div>
+  </div>
+  <div class="ups-warning caution" id="cb-warn-size-caution">
+    <div class="warn-icon">⚠️</div>
+    <div class="warn-text"><strong>Approaching Large Package Threshold</strong>
+      <span id="cb-size-caution-txt"></span></div>
+  </div>
+  <div class="ups-warning danger" id="cb-warn-size-surcharge">
+    <div class="warn-icon">🔶</div>
+    <div class="warn-text"><strong>Large Package Surcharge Will Apply</strong>
+      <span id="cb-size-surcharge-txt"></span></div>
+  </div>
+  <div class="ups-warning overlimit" id="cb-warn-size-overlimit">
+    <div class="warn-icon">🚫</div>
+    <div class="warn-text"><strong>Exceeds UPS Maximum Size — Cannot Ship</strong>
+      <span id="cb-size-overlimit-txt"></span></div>
+  </div>
+  <div class="ups-warning danger" id="cb-warn-weight-surcharge">
+    <div class="warn-icon">⚖️</div>
+    <div class="warn-text"><strong>Over 70 lbs — Additional Handling Surcharge</strong>
+      <span>UPS charges an additional handling fee for packages over 70 lbs. Max weight is 150 lbs.</span></div>
+  </div>
+  <div class="ups-warning overlimit" id="cb-warn-weight-overlimit">
+    <div class="warn-icon">🚫</div>
+    <div class="warn-text"><strong>Exceeds UPS Weight Limit — Cannot Ship</strong>
+      <span>This package exceeds the 150 lb UPS maximum weight and cannot be accepted.</span></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+      <div>
+        <h2>Custom Box Builder</h2>
+        <p class="subtitle">Enter dimensions in any order — they're sorted automatically. Generates a price and a cut &amp; fold diagram from a 50&quot; × 80&quot; sheet.</p>
+      </div>
+      <div class="hdr-actions">
+        <select class="hist-sel" id="hist-cb" style="display:none;"></select>
+        <button class="btn btn-sm btn-outline" id="cb-clear" type="button">Clear</button>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 14px;">
+      <label>Dimensions Entered Are</label>
+      <select id="cb-dimtype">
+        <option value="box">Box Dimensions — build to this exact size</option>
+        <option value="item">Item Dimensions — add cushion for the box</option>
+      </select>
+      <div class="dimtype-hint" id="cb-dimtype-hint"></div>
+    </div>
+
+    <div class="form-row col4">
+      <div class="form-group"><label>Dimension 1 (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="cb-d1" placeholder="e.g. 24"></div>
+      <div class="form-group"><label>Dimension 2 (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="cb-d2" placeholder="e.g. 16"></div>
+      <div class="form-group"><label>Dimension 3 (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="cb-d3" placeholder="e.g. 10"></div>
+      <div class="form-group"><label>Weight (lbs)</label><input type="number" inputmode="decimal" min="0" step="0.5" id="cb-weight" placeholder="e.g. 30"></div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 18px;">
+      <label>Packing Level</label>
+      <div class="pill-group" id="cb-pills">
+        <div class="pill" data-level="Basic">Basic</div>
+        <div class="pill selected" data-level="Standard">Standard</div>
+        <div class="pill" data-level="Fragile">Fragile</div>
+        <div class="pill" data-level="Custom">Custom</div>
+        <div class="pill" data-level="Blue Board">Blue Board</div>
+        <div class="pill" data-level="Box Only">Box Only</div>
+      </div>
+    </div>
+
+    <div class="cb-heavy" id="cb-heavy" style="display:none;">
+      <span class="cbh-icon">⚠️</span>
+      <span class="cbh-text" id="cb-heavy-txt"></span>
+      <button class="btn btn-sm btn-gold" id="cb-heavy-btn" type="button">Use Blue Board</button>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="cb-generate">Generate Diagram &amp; Price</button>
+
+    <!-- Price -->
+    <div class="custom-price-result" id="cb-price">
+      <div>
+        <div class="cpr-label" id="cb-price-label"></div>
+        <div class="cpr-formula" id="cb-price-formula"></div>
+      </div>
+      <div class="cpr-price" id="cb-price-value"></div>
+    </div>
+
+    <!-- Not feasible -->
+    <div class="not-feasible" id="cb-not-feasible"></div>
+
+    <!-- Diagram -->
+    <div class="diagram-wrap" id="cb-diagram-wrap">
+      <div class="diagram-title" id="cb-diagram-title">Cut &amp; Fold Diagram</div>
+      <div class="diagram-area" id="cb-diagram"></div>
+      <div class="diagram-area" id="cb-diagram2" style="margin-top:12px; display:none;"></div>
+      <div class="diagram-legend">
+        <span><svg width="26" height="8" style="vertical-align:middle;margin-right:4px"><line x1="0" y1="4" x2="26" y2="4" stroke="#185FA5" stroke-width="2"/></svg>Fold line</span>
+        <span><svg width="26" height="8" style="vertical-align:middle;margin-right:4px"><line x1="0" y1="4" x2="26" y2="4" stroke="#B22020" stroke-width="2" stroke-dasharray="6 3"/></svg>Cut line</span>
+      </div>
+      <div class="diagram-note" id="cb-diagram-note" style="display:none;"></div>
+    </div>
+  </div>
 </div>
-<div id="soon-board" class="tab-content">
-  <div class="soon"><div class="soon-icon">🔷</div><h2>Blue Board Calculator</h2><p>Building next — not yet available.</p></div>
-</div>
-<div id="soon-print" class="tab-content">
-  <div class="soon"><div class="soon-icon">🖨️</div><h2>Print Quote</h2><p>Building next — not yet available.</p></div>
+<div id="blue-board" class="tab-content">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+      <div>
+        <h2>Blue Board Panel Calculator</h2>
+        <p class="subtitle">Enter the box inside dimensions (any order). Calculates the 6 reinforcement panels and a cut layout on 48&quot; × 96&quot; sheets that maximizes the largest reusable leftover.</p>
+      </div>
+      <div class="hdr-actions">
+        <select class="hist-sel" id="hist-bb" style="display:none;"></select>
+        <button class="btn btn-sm btn-outline" id="bb-clear" type="button">Clear</button>
+      </div>
+    </div>
+
+    <div class="form-row col3">
+      <div class="form-group"><label>Length (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bb-l" placeholder="e.g. 24"></div>
+      <div class="form-group"><label>Width (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bb-w" placeholder="e.g. 18"></div>
+      <div class="form-group"><label>Height (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="bb-h" placeholder="e.g. 18"></div>
+    </div>
+
+    <button class="btn btn-primary btn-block" id="bb-generate">Calculate Panels</button>
+
+    <div class="not-feasible" id="bb-infeasible"></div>
+
+    <div class="bb-result" id="bb-result">
+      <div class="bb-panels">
+        <div class="bb-panel tb"><div class="bp-name">Top &amp; Bottom</div><div class="bp-size" id="bb-p-tb">—</div><div class="bp-qty">Cut 2</div></div>
+        <div class="bb-panel long"><div class="bp-name">Long Sides</div><div class="bp-size" id="bb-p-long">—</div><div class="bp-qty">Cut 2</div></div>
+        <div class="bb-panel short"><div class="bp-name">Short Sides</div><div class="bp-size" id="bb-p-short">—</div><div class="bp-qty">Cut 2</div></div>
+      </div>
+      <div class="bb-summary" id="bb-summary"></div>
+      <div class="bb-sheets" id="bb-sheets"></div>
+      <div class="diagram-legend" style="margin-top:12px;">
+        <span><span style="display:inline-block;width:14px;height:10px;background:#B5D4F4;border:1.5px solid #185FA5;vertical-align:middle;margin-right:4px;border-radius:2px;"></span>Top / Bottom</span>
+        <span><span style="display:inline-block;width:14px;height:10px;background:#9FE1CB;border:1.5px solid #0F6E56;vertical-align:middle;margin-right:4px;border-radius:2px;"></span>Long sides</span>
+        <span><span style="display:inline-block;width:14px;height:10px;background:#F5C4B3;border:1.5px solid #993C1D;vertical-align:middle;margin-right:4px;border-radius:2px;"></span>Short sides</span>
+        <span><svg width="26" height="8" style="vertical-align:middle;margin-right:4px"><line x1="0" y1="4" x2="26" y2="4" stroke="#16a34a" stroke-width="2" stroke-dasharray="5 3"/></svg>Large leftover</span>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="settings" class="tab-content">
 
+  <div class="set-nav" id="set-nav">
+    <button class="set-nav-btn active" data-sec="set-boxes" type="button">📦 Box Inventory</button>
+    <button class="set-nav-btn" data-sec="set-cushions" type="button">🛡️ Cushioning</button>
+    <button class="set-nav-btn" data-sec="set-mult" type="button">✂️ Multipliers</button>
+    <button class="set-nav-btn" data-sec="set-data" type="button">💾 Backup</button>
+  </div>
+
+  <div class="set-section active" id="set-boxes">
   <!-- BOX INVENTORY -->
   <div class="card">
     <div class="settings-section">
@@ -562,15 +787,33 @@
     </div>
   </div>
 
+  </div><!-- /set-boxes -->
+
+  <div class="set-section" id="set-cushions">
   <!-- PACKING LEVELS REFERENCE -->
   <div class="card">
     <div class="settings-section">
-      <h3>🧸 Packing Level Cushions <span class="sec-note">(Box Finder)</span></h3>
-      <p class="sec-desc">Cushion added to each side of the item before matching a box — a bigger cushion finds a bigger box. (Packing price comes from each box above.)</p>
+      <h3>🛡️ Packing Level Cushioning <span class="sec-note">(Box Finder &amp; Custom Box)</span></h3>
+      <p class="sec-desc">Cushion added to each side of the item: in Box Finder it picks a bigger box; in Custom Box "Item Dimensions" mode it grows the built box. Blue Board ≈ board thickness.</p>
       <div class="pack-price-grid" id="cushion-grid"></div>
     </div>
   </div>
 
+  </div><!-- /set-cushions -->
+
+  <div class="set-section" id="set-mult">
+  <!-- CUSTOM BOX MULTIPLIERS -->
+  <div class="card">
+    <div class="settings-section">
+      <h3>✂️ Custom Box Multipliers <span class="sec-note">(Custom Box)</span></h3>
+      <p class="sec-desc">Price = (L + W + H) × multiplier, rounded up to the nearest dollar.</p>
+      <div class="pack-price-grid" id="mult-grid"></div>
+    </div>
+  </div>
+
+  </div><!-- /set-mult -->
+
+  <div class="set-section" id="set-data">
   <!-- DATA MANAGEMENT -->
   <div class="card">
     <div class="settings-section">
@@ -585,7 +828,7 @@
     </div>
   </div>
 
-  <p class="sec-desc" style="text-align:center; margin: 0 0 4px;">Custom Box, Blue Board &amp; Print Quote settings will appear here as those tabs are built.</p>
+  </div><!-- /set-data -->
 
   <div class="save-bar">
     <button class="btn btn-primary" style="flex:1;" id="save-all-btn">💾&nbsp; Save All Settings</button>
@@ -661,7 +904,9 @@ const DEFAULT_INVENTORY = [
 ];
 
 // Default cushion per side — editable in Settings, persisted to localStorage.
-const DEFAULT_CUSHION = { Basic:0, Standard:1.5, Fragile:2, Custom:3 };
+// Blue Board (≈ board thickness) is editable too; Box Only is always 0 (build to size).
+const DEFAULT_CUSHION = { Basic:0, Standard:1.5, Fragile:2, Custom:3, 'Blue Board':1 };
+const CUSHION_KEYS = ['Basic', 'Standard', 'Fragile', 'Custom', 'Blue Board'];
 // Boxes that can be trimmed shorter (in 2" steps, min 4" final height).
 const CUTTABLE = { 'Cubed': true, 'Non-Cubed': true, 'Long': true };
 const CUT_STEP = 2, CUT_MIN_HEIGHT = 4;
@@ -700,6 +945,33 @@ persistVersion();
 // Editable packing-level cushions (per side, inches).
 let CUSHION = Object.assign({}, DEFAULT_CUSHION, loadJSON('ups.cushion', {}));
 function persistCushion() { safeSet('ups.cushion', JSON.stringify(CUSHION)); }
+
+// Custom Box packing levels (includes Box Only & Blue Board) and price multipliers.
+// Price = ceil((L+W+H) × multiplier). Fragile = 0.90 confirmed; others are editable defaults.
+const CB_LEVELS = ['Basic', 'Standard', 'Fragile', 'Custom', 'Blue Board', 'Box Only'];
+// 'Box Only 2-Part' isn't a pill — it's the rate used automatically when a Box Only
+// job comes out as a two-part box (more material/labor than a single-part box).
+const DEFAULT_MULTIPLIERS = { Basic:0.65, Standard:0.75, Fragile:0.90, Custom:1.10, 'Box Only':0.50, 'Box Only 2-Part':0.75, 'Blue Board':1.30 };
+const MULT_KEYS = ['Basic', 'Standard', 'Fragile', 'Custom', 'Blue Board', 'Box Only', 'Box Only 2-Part'];
+const MULT_LABEL = { 'Box Only': '1 Part — Box Only', 'Box Only 2-Part': '2 Part — Box Only' };
+let MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS, loadJSON('ups.multipliers', {}));
+function persistMultipliers() { safeSet('ups.multipliers', JSON.stringify(MULTIPLIERS)); }
+
+// Multiplier for a level given the resulting layout type ('single' | 'two' | 'infeasible').
+function cbMultiplier(level, layoutType) {
+  if (level === 'Box Only' && layoutType === 'two') return MULTIPLIERS['Box Only 2-Part'];
+  return MULTIPLIERS[level];
+}
+
+// Cushion per side used by the Custom Box "add cushion" toggle. Shares the editable
+// Box-Finder cushions for the four standard levels; Box Only = none, Blue Board = ~board thickness.
+function cbCushionFor(level) {
+  if (level === 'Box Only') return 0;
+  return CUSHION[level] != null ? CUSHION[level] : 0;
+}
+
+// Custom Box cardboard sheet (inches).
+const SHEET_W = 50, SHEET_H = 80;
 
 /* ════════════════ HELPERS ════════════════ */
 const $ = id => document.getElementById(id);
@@ -808,7 +1080,7 @@ function updateWeightBanners(weight) {
   $('warn-weight-overlimit').classList.toggle('show', overlimit);
 }
 
-function find() {
+function find(record) {
   const { L, W, H, weight } = readDims();
 
   // Validate dimensions
@@ -827,6 +1099,12 @@ function find() {
     $('box-no-match').classList.remove('show');
     $('box-empty').style.display = 'block';
     return;
+  }
+
+  if (record) {
+    const wl = (weight !== null && !isNaN(weight)) ? ' · ' + fmt(weight) + 'lb' : '';
+    histPush('bf', { label: `${fmt(L)}×${fmt(W)}×${fmt(H)}${wl} · ${selectedLevel}`,
+      data: { L, W, H, weight: (weight !== null && !isNaN(weight)) ? weight : '', level: selectedLevel } });
   }
 
   const { padded, cushion, matches } = findBoxes(L, W, H, selectedLevel);
@@ -894,16 +1172,26 @@ function renderResult(matches, level, weight, padded) {
   // CMS / shipping dims = finished (cut) box + 1" each
   $('res-cms').textContent = dimsStr(b.l + 1, b.w + 1, finishedH + 1);
 
-  // Heavy item advisory (≥ 40 lbs)
+  // Weight advisories. 275# boxes are rated to 65 lbs; warn when that's exceeded.
+  // Non-275# boxes get the heavy-item advisory at 40+ lbs.
   const heavyEl = $('res-heavy');
-  if (weight !== null && !isNaN(weight) && weight >= 40) {
+  const wv = (weight !== null && !isNaN(weight)) ? weight : null;
+  if (wv !== null && b.heavy && wv >= 65) {
     heavyEl.style.display = 'block';
+    heavyEl.classList.add('over');
     heavyEl.innerHTML =
-      `⚠️ &nbsp;<strong>${fmt(weight)} lbs — heavy item.</strong> ` +
+      `🚫 &nbsp;<strong>${fmt(wv)} lbs — exceeds this 275# box's 65 lb rating.</strong> ` +
+      `Reinforce with blue board and double-box, or split the contents.`;
+  } else if (wv !== null && wv >= 40 && !b.heavy) {
+    heavyEl.style.display = 'block';
+    heavyEl.classList.remove('over');
+    heavyEl.innerHTML =
+      `⚠️ &nbsp;<strong>${fmt(wv)} lbs — heavy item.</strong> ` +
       `Use <strong>Custom</strong> packing level and reinforce box with blue board, ` +
       `or upgrade to a 275# box if one fits.`;
   } else {
     heavyEl.style.display = 'none';
+    heavyEl.classList.remove('over');
   }
 
   // Alternatives (up to 3)
@@ -925,6 +1213,35 @@ function renderResult(matches, level, weight, padded) {
   }
 }
 
+/* ════════════════ HISTORY (last 20 per tab) ════════════════ */
+const HIST_MAX = 20;
+const HIST_APPLY = {};   // key -> function(data)
+function histPush(key, entry) {
+  let arr = loadJSON('ups.hist.' + key, []).filter(e => e.label !== entry.label);
+  arr.unshift(entry);
+  arr = arr.slice(0, HIST_MAX);
+  safeSet('ups.hist.' + key, JSON.stringify(arr));
+  histRender(key);
+}
+function histRender(key) {
+  const sel = $('hist-' + key); if (!sel) return;
+  const arr = loadJSON('ups.hist.' + key, []);
+  sel.style.display = arr.length ? '' : 'none';
+  sel.innerHTML = '<option value="">↩ Recent…</option>' + arr.map((e, i) => `<option value="${i}">${e.label}</option>`).join('');
+  sel.value = '';
+}
+function histInit(key, applyFn) {
+  HIST_APPLY[key] = applyFn;
+  const sel = $('hist-' + key);
+  sel.addEventListener('change', () => {
+    const i = sel.value; if (i === '') return;
+    const arr = loadJSON('ups.hist.' + key, []);
+    if (arr[i]) applyFn(arr[i].data);
+    sel.value = '';
+  });
+  histRender(key);
+}
+
 /* ════════════════ UI WIRING ════════════════ */
 function showTab(id, btn) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -933,6 +1250,14 @@ function showTab(id, btn) {
   btn.classList.add('active');
   window.scrollTo(0, 0);
 }
+
+// Box Finder history
+histInit('bf', d => {
+  $('in-length').value = d.L; $('in-width').value = d.W; $('in-height').value = d.H; $('in-weight').value = d.weight;
+  selectedLevel = d.level;
+  document.querySelectorAll('#pack-pills .pill').forEach(p => p.classList.toggle('selected', p.dataset.level === d.level));
+  find(false);
+});
 
 // Packing pills
 $('pack-pills').addEventListener('click', e => {
@@ -944,7 +1269,22 @@ $('pack-pills').addEventListener('click', e => {
   if ($('box-result').classList.contains('show') || $('box-no-match').classList.contains('show')) find();
 });
 
-$('find-btn').addEventListener('click', find);
+$('find-btn').addEventListener('click', () => find(true));
+
+// Clear dimensions + weight (keeps the selected packing level)
+function clearInputs() {
+  ['in-length', 'in-width', 'in-height', 'in-weight'].forEach(id => {
+    $(id).value = '';
+    $(id).classList.remove('invalid');
+  });
+  $('box-result').classList.remove('show');
+  $('box-no-match').classList.remove('show');
+  $('box-empty').style.display = 'block';
+  $('warn-weight-surcharge').classList.remove('show');
+  $('warn-weight-overlimit').classList.remove('show');
+  $('in-length').focus();
+}
+$('clear-btn').addEventListener('click', clearInputs);
 
 // Recalculate live once a result is on screen
 ['in-length', 'in-width', 'in-height', 'in-weight'].forEach(id => {
@@ -954,10 +1294,605 @@ $('find-btn').addEventListener('click', find);
   });
 });
 
-// Enter key submits
+// Enter key submits (and records to history)
 document.querySelectorAll('#box-finder input').forEach(inp => {
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { inp.blur(); find(); } });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { inp.blur(); find(true); } });
 });
+
+/* ════════════════════════════════════════════════════
+   CUSTOM BOX — price + cut/fold diagram from a 50×80 sheet.
+   Spec: Notion "Custom Box Notes" & "Custom Box Logic".
+═══════════════════════════════════════════════════════ */
+const r2 = x => Math.round(x * 100) / 100;
+let cbLevel = 'Standard';
+
+/* ---- Price: ceil((L+W+H) × multiplier) ---- */
+function cbPrice(L, W, H, m) {
+  const sum = L + W + H;
+  const raw = sum * m;
+  return { sum, m, raw, price: Math.ceil(raw - 1e-9) };
+}
+
+/* ---- UPS banners (size + weight) ---- */
+function cbShow(id, on) { $(id).classList.toggle('show', !!on); }
+function cbBanners(L, W, H, weight) {
+  const girth = 2 * W + 2 * H, lpg = L + girth;
+  const hard = L > 108 || lpg > 165;
+  const sur  = !hard && lpg > 130;
+  const cau  = !hard && !sur && lpg >= 120;
+  cbShow('cb-warn-size-overlimit', hard);
+  cbShow('cb-warn-size-surcharge', sur);
+  cbShow('cb-warn-size-caution', cau);
+  if (cau) $('cb-size-caution-txt').textContent = `Length + girth = ${fmt(r2(lpg))}". UPS surcharge applies above 130". Verify with customer.`;
+  if (sur) $('cb-size-surcharge-txt').textContent = `Length + girth = ${fmt(r2(lpg))}". Additional UPS surcharge will be added at checkout.`;
+  if (hard) $('cb-size-overlimit-txt').textContent = (L > 108)
+    ? `Length ${fmt(L)}" exceeds the 108" UPS maximum.`
+    : `Length + girth = ${fmt(r2(lpg))}" exceeds the 165" UPS maximum.`;
+  // Girth (2×W + 2×H) thresholds: yellow at 150"+, red over 165".
+  const girthRed = girth > 165;
+  const girthYellow = !girthRed && girth >= 150;
+  cbShow('cb-warn-girth-red', girthRed);
+  cbShow('cb-warn-girth-yellow', girthYellow);
+  if (girthRed) $('cb-girth-red-txt').textContent = `Girth (2×W + 2×H) = ${fmt(r2(girth))}". Over the 165" maximum — cannot ship.`;
+  if (girthYellow) $('cb-girth-yellow-txt').textContent = `Girth (2×W + 2×H) = ${fmt(r2(girth))}". Verify oversize handling with the customer.`;
+  const w = (weight !== null && !isNaN(weight)) ? weight : null;
+  cbShow('cb-warn-weight-surcharge', w !== null && w > 70 && w <= 150);
+  cbShow('cb-warn-weight-overlimit', w !== null && w > 150);
+}
+
+/* ════════ DECISION LOGIC (try in order, first that fits) ════════ */
+// One single-part attempt. cl = center-column length, pn = side-panel dim, flap given.
+function single(maxW, maxH, orient, cl, pn, H, flap) {
+  // Flap can't exceed H, and the two flaps must overlap by at least 2" when folded
+  // (overlap = 2·flap − H). Otherwise the flaps barely meet → use a two-part box instead.
+  if (flap > H + 1e-9 || (2 * flap - H) < 2 - 1e-9) return null;
+  const width = cl + 2 * flap;
+  if (width > maxW + 1e-9) return null;
+  const base = 2 * flap + 2 * pn;
+  if (base > maxH + 1e-9) return null;
+  let tape = Math.max(Math.min(pn - 1, maxH - base), 2);
+  const total = tape + base;
+  if (total > maxH + 1e-9) return null;
+  return { type: 'single', orientation: orient, L: cl, W: pn, H, flap: r2(flap),
+           tape: r2(tape), sheetW: r2(width), sheetH: r2(total), reduced: flap < H - 1e-9 };
+}
+
+function twoPartLayout(orientation, bottom, top) {
+  const dim = p => ({ cols: p.cols.map(r2), rows: p.rows.map(r2),
+    w: r2(p.cols[0] + p.cols[1] + p.cols[2]), h: r2(p.rows[0] + p.rows[1] + p.rows[2]) });
+  return { type: 'two', orientation, bottom: dim(bottom), top: dim(top) };
+}
+
+function computeTwoPart(L, W, H) {
+  // Standard portrait (full H flaps) — check the larger top piece fits 50×80.
+  if (2 * H + (L + 0.25) <= 50 + 1e-9 && 2 * H + (W + 0.25) <= 80 + 1e-9) {
+    return twoPartLayout('portrait',
+      { cols: [H, L, H], rows: [H, W, H] },
+      { cols: [H, L + 0.25, H], rows: [H, W + 0.25, H] });
+  }
+  // Landscape A: L in center row, W in column direction.
+  const rfA = Math.min(H, (50 - L) / 2), cfA = Math.min(H, (80 - W) / 2);
+  if (rfA >= H / 2 - 1e-9 && cfA >= H / 2 - 1e-9) {
+    const rfAt = Math.min(H, (50 - (L + 0.25)) / 2), cfAt = Math.min(H, (80 - (W + 0.25)) / 2);
+    return twoPartLayout('landscape',
+      { cols: [cfA, W, cfA], rows: [rfA, L, rfA] },
+      { cols: [cfAt, W + 0.25, cfAt], rows: [rfAt, L + 0.25, rfAt] });
+  }
+  // Landscape B: L in column direction, W in center row.
+  const rfB = Math.min(H, (50 - W) / 2), cfB = Math.min(H, (80 - L) / 2);
+  if (rfB >= H / 2 - 1e-9 && cfB >= H / 2 - 1e-9) {
+    const rfBt = Math.min(H, (50 - (W + 0.25)) / 2), cfBt = Math.min(H, (80 - (L + 0.25)) / 2);
+    return twoPartLayout('landscape',
+      { cols: [cfB, L, cfB], rows: [rfB, W, rfB] },
+      { cols: [cfBt, L + 0.25, cfBt], rows: [rfBt, W + 0.25, rfBt] });
+  }
+  return { type: 'infeasible' };
+}
+
+function computeLayout(L, W, H) {
+  const attempts = [
+    single(50, 80, 'portrait',  L, W, H, H),            // 1: portrait full
+    single(50, 80, 'portrait',  W, L, H, H),            // 2: portrait full, swap
+    single(50, 80, 'portrait',  L, W, H, (50 - L) / 2), // 3: portrait reduced
+    single(50, 80, 'portrait',  W, L, H, (50 - W) / 2), //    portrait reduced, swap
+    single(80, 50, 'landscape', L, W, H, H),            // 4: landscape full
+    single(80, 50, 'landscape', W, L, H, H),            //    landscape full, swap
+    single(80, 50, 'landscape', L, W, H, (80 - L) / 2), //    landscape reduced
+    single(80, 50, 'landscape', W, L, H, (80 - W) / 2)
+  ];
+  for (const a of attempts) if (a) return a;
+  return computeTwoPart(L, W, H);                        // 5 / 6
+}
+
+/* ════════ SVG HELPERS ════════ */
+const cutLine  = (x1, y1, x2, y2) => `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#B22020" stroke-width="1.8" stroke-dasharray="6 3"/>`;
+const foldLine = (x1, y1, x2, y2) => `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#185FA5" stroke-width="1.2"/>`;
+const dimLine  = (x1, y1, x2, y2) => `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#94a3b8" stroke-width="1"/>`;
+function txt(x, y, s, o) {
+  o = o || {};
+  const rot = o.rotate ? ` transform="rotate(${o.rotate} ${x.toFixed(1)} ${y.toFixed(1)})"` : '';
+  const wt = o.weight ? ` font-weight="${o.weight}"` : '';
+  return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${o.size || 11}" fill="${o.fill || '#475569'}" text-anchor="${o.anchor || 'middle'}"${wt}${rot}>${s}</text>`;
+}
+const shade = (x, y, w, h, op) => `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#009CBD" opacity="${op}"/>`;
+
+/* ---- Single-part diagram ---- */
+function buildSingle(lay) {
+  const { flap, L, W, tape, H, sheetW, sheetH } = lay;
+  const LX = 46, TY = 18, areaW = 470, maxH = 540;
+  const s = Math.min(areaW / sheetW, maxH / sheetH);
+  const X = [LX]; [flap, L, flap].forEach(w => X.push(X[X.length - 1] + w * s));
+  const Y = [TY]; [tape, flap, W, flap, W].forEach(h => Y.push(Y[Y.length - 1] + h * s));
+  const [x0, x1, x2, x3] = X, [y0, y1, y2, y3, y4, y5] = Y;
+  let p = '';
+  p += `<rect x="${x0}" y="${y0}" width="${(x3 - x0).toFixed(1)}" height="${(y5 - y0).toFixed(1)}" fill="none" stroke="#009CBD" stroke-width="1.5"/>`;
+  // corner notches (top-left, top-right): shaded + cut edges + "cut"
+  p += shade(x0, y0, x1 - x0, y1 - y0, 0.06) + shade(x2, y0, x3 - x2, y1 - y0, 0.06);
+  p += cutLine(x1, y0, x1, y1) + cutLine(x0, y1, x1, y1);
+  p += cutLine(x2, y0, x2, y1) + cutLine(x2, y1, x3, y1);
+  p += txt((x0 + x1) / 2, (y0 + y1) / 2 + 4, 'cut', { size: 10, fill: '#B22020' });
+  p += txt((x2 + x3) / 2, (y0 + y1) / 2 + 4, 'cut', { size: 10, fill: '#B22020' });
+  // vertical folds (below notches)
+  p += foldLine(x1, y1, x1, y5) + foldLine(x2, y1, x2, y5);
+  // horizontal: tape-flap fold (center), then center fold + side cuts at y2,y3,y4
+  p += foldLine(x1, y1, x2, y1);
+  [y2, y3, y4].forEach(yy => { p += foldLine(x1, yy, x2, yy) + cutLine(x0, yy, x1, yy) + cutLine(x2, yy, x3, yy); });
+  // bottom dimension arrows: flap | L | flap (actual cut widths)
+  const yB = y5 + 16;
+  p += dimLine(x0, yB, x3, yB); [x0, x1, x2, x3].forEach(xx => p += dimLine(xx, yB - 4, xx, yB + 4));
+  p += txt((x0 + x1) / 2, yB + 15, fmt(flap) + '"') + txt((x1 + x2) / 2, yB + 15, fmt(L) + '"', { weight: 700 }) + txt((x2 + x3) / 2, yB + 15, fmt(flap) + '"');
+  const yB2 = y5 + 44;
+  p += dimLine(x0, yB2, x3, yB2) + dimLine(x0, yB2 - 4, x0, yB2 + 4) + dimLine(x3, yB2 - 4, x3, yB2 + 4);
+  p += txt((x0 + x3) / 2, yB2 + 15, fmt(sheetW) + '"', { weight: 700, fill: '#1a1a2e' });
+  // right side arrows bottom→top: W, H, W, H, tape — the box dimension each row represents.
+  const xR = x3 + 16;
+  p += dimLine(xR, y0, xR, y5); [y0, y1, y2, y3, y4, y5].forEach(yy => p += dimLine(xR - 4, yy, xR + 4, yy));
+  p += txt(xR + 8, (y4 + y5) / 2 + 4, 'W ' + fmt(W) + '"', { anchor: 'start' });
+  p += txt(xR + 8, (y3 + y4) / 2 + 4, 'H ' + fmt(H) + '"', { anchor: 'start' });
+  p += txt(xR + 8, (y2 + y3) / 2 + 4, 'W ' + fmt(W) + '"', { anchor: 'start' });
+  p += txt(xR + 8, (y1 + y2) / 2 + 4, 'H ' + fmt(H) + '"', { anchor: 'start' });
+  p += txt(xR + 8, (y0 + y1) / 2 + 4, 'tape ' + fmt(tape) + '"', { anchor: 'start', size: 10 });
+  const xR2 = x3 + 88;
+  p += dimLine(xR2, y0, xR2, y5) + dimLine(xR2 - 4, y0, xR2 + 4, y0) + dimLine(xR2 - 4, y5, xR2 + 4, y5);
+  p += txt(xR2 + 4, (y0 + y5) / 2, fmt(sheetH) + '"', { anchor: 'middle', weight: 700, fill: '#1a1a2e', rotate: -90 });
+  const vbH = y5 + 64;
+  return `<svg viewBox="0 0 680 ${vbH.toFixed(0)}" width="100%">${p}</svg>`;
+}
+
+/* ---- Two-part piece diagram (3×3). cutDir 'horizontal' = bottom, 'vertical' = top ---- */
+function buildPiece(piece, cutDir, roleLabel, orientation) {
+  const { cols, rows, w: sw, h: sh } = piece;
+  const LX = 46, TY = 26, areaW = 460, maxH = 360;
+  const s = Math.min(areaW / sw, maxH / sh);
+  const X = [LX]; cols.forEach(w => X.push(X[X.length - 1] + w * s));
+  const Y = [TY]; rows.forEach(h => Y.push(Y[Y.length - 1] + h * s));
+  const [x0, x1, x2, x3] = X, [y0, y1, y2, y3] = Y;
+  let p = '';
+  p += `<rect x="${x0}" y="${y0}" width="${(x3 - x0).toFixed(1)}" height="${(y3 - y0).toFixed(1)}" fill="none" stroke="#009CBD" stroke-width="1.5"/>`;
+  [[x0, y0, x1 - x0, y1 - y0], [x2, y0, x3 - x2, y1 - y0], [x0, y2, x1 - x0, y3 - y2], [x2, y2, x3 - x2, y3 - y2]]
+    .forEach(c => p += shade(c[0], c[1], c[2], c[3], 0.05));
+  if (cutDir === 'horizontal') {           // bottom: full vertical folds, horizontal corner cuts
+    p += foldLine(x1, y0, x1, y3) + foldLine(x2, y0, x2, y3);
+    p += foldLine(x1, y1, x2, y1) + foldLine(x1, y2, x2, y2);
+    p += cutLine(x0, y1, x1, y1) + cutLine(x2, y1, x3, y1) + cutLine(x0, y2, x1, y2) + cutLine(x2, y2, x3, y2);
+  } else {                                  // top: full horizontal folds, vertical corner cuts
+    p += foldLine(x0, y1, x3, y1) + foldLine(x0, y2, x3, y2);
+    p += foldLine(x1, y1, x1, y2) + foldLine(x2, y1, x2, y2);
+    p += cutLine(x1, y0, x1, y1) + cutLine(x1, y2, x1, y3) + cutLine(x2, y0, x2, y1) + cutLine(x2, y2, x2, y3);
+  }
+  const yB = y3 + 16;
+  p += dimLine(x0, yB, x3, yB); [x0, x1, x2, x3].forEach(xx => p += dimLine(xx, yB - 4, xx, yB + 4));
+  p += txt((x0 + x1) / 2, yB + 14, fmt(cols[0]) + '"') + txt((x1 + x2) / 2, yB + 14, fmt(cols[1]) + '"', { weight: 700 }) + txt((x2 + x3) / 2, yB + 14, fmt(cols[2]) + '"');
+  const xR = x3 + 14;
+  p += dimLine(xR, y0, xR, y3); [y0, y1, y2, y3].forEach(yy => p += dimLine(xR - 4, yy, xR + 4, yy));
+  p += txt(xR + 7, (y2 + y3) / 2 + 4, fmt(rows[2]) + '"', { anchor: 'start' }) + txt(xR + 7, (y1 + y2) / 2 + 4, fmt(rows[1]) + '"', { anchor: 'start', weight: 700 }) + txt(xR + 7, (y0 + y1) / 2 + 4, fmt(rows[0]) + '"', { anchor: 'start' });
+  p += txt(x0, y0 - 9, `${roleLabel} — ${fmt(sw)}" × ${fmt(sh)}"${orientation === 'landscape' ? ' (landscape)' : ''}`, { anchor: 'start', size: 12, weight: 700, fill: '#1a1a2e' });
+  const vbH = y3 + 38;
+  return `<svg viewBox="0 0 680 ${vbH.toFixed(0)}" width="100%">${p}</svg>`;
+}
+
+/* ---- Orchestration ---- */
+function cbGenerate(record) {
+  const d = [parseFloat($('cb-d1').value), parseFloat($('cb-d2').value), parseFloat($('cb-d3').value)];
+  const wRaw = $('cb-weight').value.trim();
+  const weight = wRaw === '' ? null : parseFloat(wRaw);
+  let valid = true;
+  [['cb-d1', d[0]], ['cb-d2', d[1]], ['cb-d3', d[2]]].forEach(([id, v]) => {
+    const bad = isNaN(v) || v <= 0; $(id).classList.toggle('invalid', bad); if (bad) valid = false;
+  });
+  cbBanners(valid ? Math.max(...d) : 0, 0, 0, weight); // weight banners even before full validity
+  cbHeavyCheck();
+  if (!valid) {
+    $('cb-price').classList.remove('show');
+    $('cb-diagram-wrap').classList.remove('show');
+    $('cb-not-feasible').classList.remove('show');
+    return;
+  }
+  if (record) {
+    const wl = (weight !== null && !isNaN(weight)) ? ' · ' + fmt(weight) + 'lb' : '';
+    histPush('cb', { label: `${fmt(d[0])}×${fmt(d[1])}×${fmt(d[2])}${wl} · ${cbLevel}`,
+      data: { d1: d[0], d2: d[1], d3: d[2], weight: (weight !== null && !isNaN(weight)) ? weight : '', level: cbLevel, dimtype: $('cb-dimtype').value } });
+  }
+  // If entering ITEM dimensions, pad by the level's cushion on every side to get the box.
+  const pad = $('cb-dimtype').value === 'item' ? cbCushionFor(cbLevel) : 0;
+  const boxRaw = d.map(v => v + 2 * pad);
+  const sorted = boxRaw.slice().sort((a, b) => b - a);
+  const L = sorted[0], W = sorted[1], H = sorted[2];
+  cbBanners(L, W, H, weight);
+
+  // Layout first so Box Only can price single- vs two-part differently.
+  const lay = computeLayout(L, W, H);
+  const m = cbMultiplier(cbLevel, lay.type);
+  const pr = cbPrice(L, W, H, m);
+
+  let lvlLabel = cbLevel;
+  if (cbLevel === 'Box Only') lvlLabel = `Box Only — ${lay.type === 'two' ? '2 Part' : lay.type === 'single' ? '1 Part' : 'n/a'}`;
+  $('cb-price').classList.add('show');
+  $('cb-price-label').textContent = `${lvlLabel} · ${fmt(L)} × ${fmt(W)} × ${fmt(H)} box`
+    + (pad > 0 ? ` (+${fmt(pad)}" cushion per side)` : '');
+  $('cb-price-formula').textContent = `(${fmt(L)} + ${fmt(W)} + ${fmt(H)}) × ${pr.m} = ${pr.raw.toFixed(2)} → rounds up to $${pr.price}`;
+  $('cb-price-value').textContent = '$' + pr.price;
+
+  renderLayout(lay);
+}
+
+function renderLayout(lay) {
+  const wrap = $('cb-diagram-wrap'), nf = $('cb-not-feasible'), d2 = $('cb-diagram2'), note = $('cb-diagram-note');
+  if (lay.type === 'infeasible') {
+    wrap.classList.remove('show');
+    nf.classList.add('show');
+    nf.textContent = 'This box cannot be built from a 50" × 80" sheet in any configuration.';
+    return;
+  }
+  nf.classList.remove('show');
+  wrap.classList.add('show');
+  if (lay.type === 'single') {
+    $('cb-diagram-title').textContent = 'Single-Part Box — Cut & Fold Diagram' + (lay.orientation === 'landscape' ? ' (landscape)' : '');
+    $('cb-diagram').innerHTML = buildSingle(lay);
+    d2.style.display = 'none';
+    if (lay.reduced) {
+      const overlap = r2(2 * lay.flap - lay.H);
+      note.style.display = 'block';
+      note.textContent = `Box H = ${fmt(lay.H)}". Flaps are ${fmt(lay.flap)}" each — when folded from both sides they overlap ${fmt(overlap)}" and fully cover the ${fmt(lay.H)}" height.`;
+    } else {
+      note.style.display = 'none';
+    }
+  } else {
+    $('cb-diagram-title').textContent = 'Two-Part Box — Cut & Fold Diagrams' + (lay.orientation === 'landscape' ? ' (landscape)' : '');
+    $('cb-diagram').innerHTML = buildPiece(lay.bottom, 'horizontal', 'Bottom piece', lay.orientation);
+    d2.style.display = 'block';
+    d2.innerHTML = buildPiece(lay.top, 'vertical', 'Top piece', lay.orientation);
+    note.style.display = 'block';
+    note.textContent = 'Top piece is ¼" larger on length & width so it slides over the bottom. Bottom: horizontal corner cuts (corners fold with the long sides). Top: vertical corner cuts (corners fold with the short sides).';
+  }
+}
+
+// Hint under the dimension-type selector.
+function cbUpdateDimHint() {
+  const item = $('cb-dimtype').value === 'item';
+  const c = cbCushionFor(cbLevel);
+  $('cb-dimtype-hint').textContent = item
+    ? `Box = item size + ${fmt(c)}" cushion per side (${cbLevel}).`
+    : 'The box is built to the exact dimensions you enter.';
+}
+const cbResultShowing = () => $('cb-price').classList.contains('show') || $('cb-not-feasible').classList.contains('show');
+
+// Heavy-item advisory: 40+ lbs should be reinforced with Blue Board.
+function cbHeavyCheck() {
+  const wRaw = $('cb-weight').value.trim();
+  const w = wRaw === '' ? null : parseFloat(wRaw);
+  const heavy = w !== null && !isNaN(w) && w >= 40 && cbLevel !== 'Blue Board';
+  $('cb-heavy').style.display = heavy ? 'flex' : 'none';
+  if (heavy) $('cb-heavy-txt').textContent = `${fmt(w)} lbs — heavy item. Reinforce the custom box with Blue Board.`;
+}
+function cbSetLevel(level) {
+  cbLevel = level;
+  document.querySelectorAll('#cb-pills .pill').forEach(p => p.classList.toggle('selected', p.dataset.level === level));
+  cbUpdateDimHint(); cbHeavyCheck();
+  if (cbResultShowing()) cbGenerate();
+}
+
+// Wiring
+$('cb-pills').addEventListener('click', e => {
+  const pill = e.target.closest('.pill'); if (!pill) return;
+  cbSetLevel(pill.dataset.level);
+});
+$('cb-heavy-btn').addEventListener('click', () => cbSetLevel('Blue Board'));
+$('cb-dimtype').addEventListener('change', () => {
+  cbUpdateDimHint();
+  if (cbResultShowing()) cbGenerate();
+});
+$('cb-generate').addEventListener('click', () => cbGenerate(true));
+['cb-d1', 'cb-d2', 'cb-d3', 'cb-weight'].forEach(id => $(id).addEventListener('input', () => {
+  $(id).classList.remove('invalid');
+  cbHeavyCheck();
+  if (cbResultShowing()) cbGenerate();
+}));
+document.querySelectorAll('#custom-box input').forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { inp.blur(); cbGenerate(true); } });
+});
+// Custom Box history
+histInit('cb', d => {
+  $('cb-d1').value = d.d1; $('cb-d2').value = d.d2; $('cb-d3').value = d.d3; $('cb-weight').value = d.weight;
+  $('cb-dimtype').value = d.dimtype || 'box';
+  cbSetLevel(d.level); cbUpdateDimHint(); cbGenerate(false);
+});
+
+// Clear dimensions + weight (keeps level and cushion toggle)
+function cbClear() {
+  ['cb-d1', 'cb-d2', 'cb-d3', 'cb-weight'].forEach(id => { $(id).value = ''; $(id).classList.remove('invalid'); });
+  $('cb-price').classList.remove('show');
+  $('cb-diagram-wrap').classList.remove('show');
+  $('cb-not-feasible').classList.remove('show');
+  ['cb-warn-girth-red', 'cb-warn-girth-yellow', 'cb-warn-size-caution', 'cb-warn-size-surcharge', 'cb-warn-size-overlimit', 'cb-warn-weight-surcharge', 'cb-warn-weight-overlimit']
+    .forEach(id => $(id).classList.remove('show'));
+  $('cb-heavy').style.display = 'none';
+  $('cb-d1').focus();
+}
+$('cb-clear').addEventListener('click', cbClear);
+cbUpdateDimHint();
+
+/* ════════════════════════════════════════════════════
+   BLUE BOARD — 6 reinforcement panels packed on 48×96 sheets.
+   Spec: Notion "Blue Board Notes" & "Blue Board Logic".
+═══════════════════════════════════════════════════════ */
+const BB_SW = 48, BB_SH = 96;   // sheet width × height (inches)
+
+// ---- Maximal-rectangles packer (reference algorithm) ----
+function bbPlaceRect(free, w, h) {              // lowest-then-leftmost free rect that fits
+  let best = null;
+  for (const fr of free) {
+    if (w <= fr[2] + 1e-9 && h <= fr[3] + 1e-9) {
+      const sc = fr[1] * 1000 + fr[0];
+      if (!best || sc < best.sc) best = { sc, x: fr[0], y: fr[1] };
+    }
+  }
+  return best;
+}
+function bbApply(free, x, y, w, h) {            // split overlapped free rects, prune contained
+  const nf = [];
+  for (const f of free) {
+    const [fx, fy, fw, fh] = f;
+    const overlaps = !(fx + fw <= x + 1e-9 || x + w <= fx + 1e-9 || fy + fh <= y + 1e-9 || y + h <= fy + 1e-9);
+    if (!overlaps) { nf.push(f); continue; }
+    if (fx + fw > x + w) nf.push([x + w, fy, fx + fw - (x + w), fh]);
+    if (x > fx)         nf.push([fx, fy, x - fx, fh]);
+    if (y > fy)         nf.push([x, fy, w, y - fy]);
+    if (fy + fh > y + h) nf.push([x, y + h, w, fy + fh - (y + h)]);
+  }
+  const valid = nf.filter(r => r[2] > 1e-9 && r[3] > 1e-9);
+  return valid.filter((a, i) => !valid.some((b, j) => j !== i &&
+    a[0] >= b[0] - 1e-9 && a[1] >= b[1] - 1e-9 &&
+    a[0] + a[2] <= b[0] + b[2] + 1e-9 && a[1] + a[3] <= b[1] + b[3] + 1e-9 &&
+    a[2] * a[3] < b[2] * b[3] - 1e-9));
+}
+function bbPack(order) {                         // order: [{name,type,w,h,rot}]; returns placements or null
+  let free = [[0, 0, BB_SW, BB_SH]];
+  const placed = [];
+  for (const p of order) {
+    const b = bbPlaceRect(free, p.w, p.h);
+    if (!b) return null;
+    placed.push({ name: p.name, type: p.type, x: b.x, y: b.y, w: p.w, h: p.h, rot: p.rot });
+    free = bbApply(free, b.x, b.y, p.w, p.h);
+  }
+  return placed;
+}
+// Gravity-settle every panel up then left against its neighbours so panels butt
+// flush with no gaps (the greedy packer can otherwise leave slivers between pieces).
+function bbCompact(placed) {
+  for (let iter = 0; iter < 40; iter++) {
+    let moved = false;
+    placed.slice().sort((a, b) => (a.y - b.y) || (a.x - b.x)).forEach(p => {
+      let ly = 0;
+      for (const q of placed) {
+        if (q === p) continue;
+        if (q.x < p.x + p.w - 1e-9 && p.x < q.x + q.w - 1e-9 && q.y + q.h <= p.y + 1e-9) ly = Math.max(ly, q.y + q.h);
+      }
+      if (ly < p.y - 1e-9) { p.y = ly; moved = true; }
+      let lx = 0;
+      for (const q of placed) {
+        if (q === p) continue;
+        if (q.y < p.y + p.h - 1e-9 && p.y < q.y + q.h - 1e-9 && q.x + q.w <= p.x + 1e-9) lx = Math.max(lx, q.x + q.w);
+      }
+      if (lx < p.x - 1e-9) { p.x = lx; moved = true; }
+    });
+    if (!moved) break;
+  }
+  return placed;
+}
+
+// Try every orientation combo (largest-area-first order) on ONE sheet; keep min used height.
+function bbBestPack(base) {
+  const n = base.length;
+  let best = null;
+  for (let mask = 0; mask < (1 << n); mask++) {
+    const order = base.map((p, i) => {
+      const r = (mask >> i) & 1;
+      return { name: p.name, type: p.type, w: r ? p.h : p.w, h: r ? p.w : p.h, rot: !!r };
+    }).sort((a, b) => (b.w * b.h) - (a.w * a.h));
+    const placed = bbPack(order);
+    if (placed) {
+      bbCompact(placed);
+      const uh = Math.max(...placed.map(p => p.y + p.h));
+      if (!best || uh < best.uh) best = { uh: r2(uh), placed };
+    }
+  }
+  return best;
+}
+// Candidate A — "vertical-top template": Top, Bottom, Long1 stand vertical across the
+// top row; Long2 horizontal beneath; the two short sides butted in a row below.
+function bbTemplateA(L, W, H) {
+  const hs = H - 2;
+  if (2 * W + hs > BB_SW + 1e-9 || L > BB_SW + 1e-9 || 2 * (W - 2) > BB_SW + 1e-9) return null;
+  const uh = L + hs + hs;
+  if (uh > BB_SH + 1e-9) return null;
+  return { uh: r2(uh), placed: [
+    { name: 'Top', type: 'tb', x: 0, y: 0, w: W, h: L, rot: true },
+    { name: 'Bottom', type: 'tb', x: W, y: 0, w: W, h: L, rot: true },
+    { name: 'Long 1', type: 'long', x: 2 * W, y: 0, w: hs, h: L, rot: true },
+    { name: 'Long 2', type: 'long', x: 0, y: L, w: L, h: hs, rot: false },
+    { name: 'Short 1', type: 'short', x: 0, y: L + hs, w: W - 2, h: hs, rot: false },
+    { name: 'Short 2', type: 'short', x: W - 2, y: L + hs, w: W - 2, h: hs, rot: false }
+  ] };
+}
+// Candidate B — "full-width pairing": Top+Bottom, Long1+Long2, Short1+Short2 in three rows.
+function bbTemplateB(L, W, H) {
+  const hs = H - 2;
+  if (2 * L > BB_SW + 1e-9 || 2 * (W - 2) > BB_SW + 1e-9) return null;
+  const uh = W + hs + hs;
+  if (uh > BB_SH + 1e-9) return null;
+  return { uh: r2(uh), placed: [
+    { name: 'Top', type: 'tb', x: 0, y: 0, w: L, h: W, rot: false },
+    { name: 'Bottom', type: 'tb', x: L, y: 0, w: L, h: W, rot: false },
+    { name: 'Long 1', type: 'long', x: 0, y: W, w: L, h: hs, rot: false },
+    { name: 'Long 2', type: 'long', x: L, y: W, w: L, h: hs, rot: false },
+    { name: 'Short 1', type: 'short', x: 0, y: W + hs, w: W - 2, h: hs, rot: false },
+    { name: 'Short 2', type: 'short', x: W - 2, y: W + hs, w: W - 2, h: hs, rot: false }
+  ] };
+}
+// Best single-sheet layout across the packer + both templates.
+function bbSingleSheet(base, L, W, H) {
+  const cands = [bbBestPack(base), bbTemplateA(L, W, H), bbTemplateB(L, W, H)]
+    .filter(c => c && c.uh <= BB_SH + 1e-9);
+  return cands.length ? cands.reduce((m, c) => (c.uh < m.uh ? c : m)) : null;
+}
+
+// Greedy multi-sheet fallback: fill a sheet, start a new one when a panel won't fit.
+function bbGreedyMulti(base) {
+  const sorted = [...base].sort((a, b) => (b.w * b.h) - (a.w * a.h));
+  const sheets = [];
+  let free, placed;
+  const newSheet = () => { free = [[0, 0, BB_SW, BB_SH]]; placed = []; sheets.push({ placed }); };
+  newSheet();
+  for (const p of sorted) {
+    const oris = p.w === p.h ? [[p.w, p.h, false]] : [[p.w, p.h, false], [p.h, p.w, true]];
+    let did = false;
+    for (let pass = 0; pass < 2 && !did; pass++) {
+      let pick = null;
+      for (const [w, h, rot] of oris) {
+        const b = bbPlaceRect(free, w, h);
+        if (b) { const sc = b.y * 1000 + b.x; if (!pick || sc < pick.sc) pick = { sc, x: b.x, y: b.y, w, h, rot }; }
+      }
+      if (pick) {
+        placed.push({ name: p.name, type: p.type, x: pick.x, y: pick.y, w: pick.w, h: pick.h, rot: pick.rot });
+        free = bbApply(free, pick.x, pick.y, pick.w, pick.h);
+        did = true;
+      } else if (pass === 0) newSheet();
+    }
+    if (!did) return null;
+  }
+  return sheets.map(s => { bbCompact(s.placed); return { placed: s.placed, uh: r2(Math.max(...s.placed.map(p => p.y + p.h))) }; });
+}
+
+function bbCompute(L, W, H) {
+  if (W - 2 <= 0 || H - 2 <= 0)
+    return { infeasible: 'Box is too small for blue board — width and height must each be more than 2".' };
+  const base = [
+    { name: 'Top', type: 'tb', w: L, h: W }, { name: 'Bottom', type: 'tb', w: L, h: W },
+    { name: 'Long 1', type: 'long', w: L, h: H - 2 }, { name: 'Long 2', type: 'long', w: L, h: H - 2 },
+    { name: 'Short 1', type: 'short', w: W - 2, h: H - 2 }, { name: 'Short 2', type: 'short', w: W - 2, h: H - 2 }
+  ];
+  for (const p of base) {
+    const fits = (p.w <= BB_SW && p.h <= BB_SH) || (p.h <= BB_SW && p.w <= BB_SH);
+    if (!fits) return { infeasible: `A ${p.name} panel (${fmt(p.w)} × ${fmt(p.h)}") is too large for a 48 × 96" sheet.` };
+  }
+  let sheets;
+  const one = bbSingleSheet(base, L, W, H);
+  if (one) {
+    sheets = [one];
+  } else {
+    const big = base.filter(p => p.type !== 'short');
+    const small = base.filter(p => p.type === 'short');
+    const s1 = bbBestPack(big), s2 = bbBestPack(small);
+    sheets = (s1 && s2) ? [s1, s2] : bbGreedyMulti(base);
+  }
+  if (!sheets) return { infeasible: 'These panels cannot be arranged on 48 × 96" sheets.' };
+  sheets.forEach(s => { s.leftoverW = BB_SW; s.leftoverH = r2(BB_SH - s.uh); });
+  return { L, W, H, panels: { tb: [L, W], long: [L, H - 2], short: [W - 2, H - 2] }, sheets };
+}
+
+/* ---- Blue Board SVG (1" = 5px) ---- */
+const BB_FILL = { tb: '#B5D4F4', long: '#9FE1CB', short: '#F5C4B3' };
+const BB_STROKE = { tb: '#185FA5', long: '#0F6E56', short: '#993C1D' };
+function bbBuildSheet(sheet, idx, total) {
+  const PX = 5, x0 = 30, y0 = 26;
+  const sw = BB_SW * PX, sh = BB_SH * PX;
+  let p = '';
+  p += `<rect x="${x0}" y="${y0}" width="${sw}" height="${sh}" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.5"/>`;
+  for (const pl of sheet.placed) {
+    const px = x0 + pl.x * PX, py = y0 + pl.y * PX, pw = pl.w * PX, ph = pl.h * PX;
+    p += `<rect x="${px.toFixed(1)}" y="${py.toFixed(1)}" width="${pw.toFixed(1)}" height="${ph.toFixed(1)}" fill="${BB_FILL[pl.type]}" stroke="${BB_STROKE[pl.type]}" stroke-width="1.3"/>`;
+    const cx = px + pw / 2, cy = py + ph / 2;
+    const small = pw < 44 || ph < 26;
+    p += txt(cx, cy - (small ? 1 : 4), pl.name, { size: small ? 7.5 : 9, weight: 700, fill: BB_STROKE[pl.type] });
+    if (!small) p += txt(cx, cy + 9, `${fmt(pl.w)}×${fmt(pl.h)}`, { size: 8, fill: '#334155' });
+  }
+  if (sheet.leftoverH > 0) {
+    const ly = y0 + sheet.uh * PX, lh = sheet.leftoverH * PX;
+    p += `<rect x="${x0}" y="${ly.toFixed(1)}" width="${sw}" height="${lh.toFixed(1)}" fill="none" stroke="#16a34a" stroke-width="1.4" stroke-dasharray="5 3"/>`;
+    if (lh > 18) p += txt(x0 + sw / 2, ly + lh / 2, `Large leftover ${fmt(sheet.leftoverW)}×${fmt(sheet.leftoverH)}"`, { size: 9, weight: 700, fill: '#15803d' });
+  }
+  // dimension arrows: width (top) + height (left)
+  p += dimLine(x0, y0 - 10, x0 + sw, y0 - 10) + dimLine(x0, y0 - 14, x0, y0 - 6) + dimLine(x0 + sw, y0 - 14, x0 + sw, y0 - 6);
+  p += txt(x0 + sw / 2, y0 - 13, '48"', { size: 10, weight: 700, fill: '#1a1a2e' });
+  p += dimLine(x0 - 12, y0, x0 - 12, y0 + sh) + dimLine(x0 - 16, y0, x0 - 8, y0) + dimLine(x0 - 16, y0 + sh, x0 - 8, y0 + sh);
+  p += txt(x0 - 14, y0 + sh / 2, '96"', { size: 10, weight: 700, fill: '#1a1a2e', rotate: -90 });
+  p += txt(x0, y0 - 18, `Sheet ${idx + 1} of ${total}`, { anchor: 'start', size: 11, weight: 700, fill: '#1d4ed8' });
+  const vbW = x0 + sw + 12, vbH = y0 + sh + 14;
+  return `<svg viewBox="0 0 ${vbW} ${vbH}" width="100%">${p}</svg>`;
+}
+
+/* ---- Orchestration ---- */
+function bbGenerate(record) {
+  const d = [parseFloat($('bb-l').value), parseFloat($('bb-w').value), parseFloat($('bb-h').value)];
+  let valid = true;
+  [['bb-l', d[0]], ['bb-w', d[1]], ['bb-h', d[2]]].forEach(([id, v]) => {
+    const bad = isNaN(v) || v <= 0; $(id).classList.toggle('invalid', bad); if (bad) valid = false;
+  });
+  if (!valid) { $('bb-result').classList.remove('show'); $('bb-infeasible').classList.remove('show'); return; }
+  const [L, W, H] = d.slice().sort((a, b) => b - a);
+  if (record) histPush('bb', { label: `${fmt(L)}×${fmt(W)}×${fmt(H)}`, data: { L: d[0], W: d[1], H: d[2] } });
+  const res = bbCompute(L, W, H);
+  if (res.infeasible) {
+    $('bb-result').classList.remove('show');
+    $('bb-infeasible').classList.add('show');
+    $('bb-infeasible').textContent = res.infeasible;
+    return;
+  }
+  $('bb-infeasible').classList.remove('show');
+  $('bb-result').classList.add('show');
+  $('bb-p-tb').textContent = `${fmt(res.panels.tb[0])} × ${fmt(res.panels.tb[1])}`;
+  $('bb-p-long').textContent = `${fmt(res.panels.long[0])} × ${fmt(res.panels.long[1])}`;
+  $('bb-p-short').textContent = `${fmt(res.panels.short[0])} × ${fmt(res.panels.short[1])}`;
+  const big = res.sheets.reduce((m, s) => s.leftoverH > m.leftoverH ? s : m, res.sheets[0]);
+  const bigIdx = res.sheets.indexOf(big);
+  $('bb-summary').innerHTML =
+    `<strong>${fmt(res.L)} × ${fmt(res.W)} × ${fmt(res.H)}</strong> box · 1" blue board · ` +
+    `<strong>${res.sheets.length}</strong> sheet${res.sheets.length > 1 ? 's' : ''} · ` +
+    `largest reusable leftover <strong>${fmt(big.leftoverW)} × ${fmt(big.leftoverH)}"</strong>` +
+    (res.sheets.length > 1 ? ` (on sheet ${bigIdx + 1})` : '');
+  $('bb-sheets').innerHTML = res.sheets.map((s, i) =>
+    `<div class="bb-sheet"><div class="bb-sheet-title">Sheet ${i + 1} of ${res.sheets.length} — ${fmt(s.uh)}" used</div>${bbBuildSheet(s, i, res.sheets.length)}</div>`
+  ).join('');
+}
+
+$('bb-generate').addEventListener('click', () => bbGenerate(true));
+['bb-l', 'bb-w', 'bb-h'].forEach(id => $(id).addEventListener('input', () => {
+  $(id).classList.remove('invalid');
+  if ($('bb-result').classList.contains('show') || $('bb-infeasible').classList.contains('show')) bbGenerate();
+}));
+document.querySelectorAll('#blue-board input').forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { inp.blur(); bbGenerate(true); } });
+});
+// Blue Board history
+histInit('bb', d => { $('bb-l').value = d.L; $('bb-w').value = d.W; $('bb-h').value = d.H; bbGenerate(false); });
+function bbClear() {
+  ['bb-l', 'bb-w', 'bb-h'].forEach(id => { $(id).value = ''; $(id).classList.remove('invalid'); });
+  $('bb-result').classList.remove('show');
+  $('bb-infeasible').classList.remove('show');
+  $('bb-l').focus();
+}
+$('bb-clear').addEventListener('click', bbClear);
 
 /* ════════════════════════════════════════════════════
    SETTINGS — Box Inventory CRUD, Packing Prices, Backup.
@@ -979,6 +1914,7 @@ let saveTimer = null;
 function flashSaved(msg) {
   persistInventory();
   persistCushion();
+  persistMultipliers();
   const el = $('save-status');
   el.textContent = msg || 'Saved ✓';
   el.classList.add('show');
@@ -1056,17 +1992,26 @@ function deleteBox(i) {
 
 /* ---- Editable packing-level cushions ---- */
 function renderCushion() {
-  $('cushion-grid').innerHTML = PACK_LEVELS.map(lv => `
+  $('cushion-grid').innerHTML = CUSHION_KEYS.map(lv => `
     <div class="pack-price-item">
-      <div><div class="ppi-label">${lv}</div><div class="ppi-sub">inches per side</div></div>
+      <div><div class="ppi-label">${lv}</div><div class="ppi-sub">${lv === 'Blue Board' ? 'board reinforcement, per side' : 'inches per side'}</div></div>
       <div class="ppi-input"><input type="number" inputmode="decimal" min="0" step="0.25" data-level="${lv}" value="${CUSHION[lv]}">"</div>
+    </div>`).join('');
+}
+
+/* ---- Editable custom-box multipliers ---- */
+function renderMultipliers() {
+  $('mult-grid').innerHTML = MULT_KEYS.map(lv => `
+    <div class="pack-price-item">
+      <div><div class="ppi-label">${MULT_LABEL[lv] || lv}</div><div class="ppi-sub">× multiplier</div></div>
+      <div class="ppi-input"><input type="number" inputmode="decimal" min="0" step="0.01" data-level="${lv}" value="${MULTIPLIERS[lv]}"></div>
     </div>`).join('');
 }
 
 /* ---- Backup / restore ---- */
 function exportBackup() {
   const data = { app: 'ups-team-tools', section: 'box-finder', version: DATA_VERSION,
-                 exportedAt: new Date().toISOString(), inventory: INVENTORY, cushion: CUSHION };
+                 exportedAt: new Date().toISOString(), inventory: INVENTORY, cushion: CUSHION, multipliers: MULTIPLIERS };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1089,8 +2034,9 @@ function importBackup(file) {
       if (!cleaned.length) throw new Error('No valid boxes with packing prices in this file.');
       INVENTORY = cleaned;
       if (d.cushion) CUSHION = Object.assign({}, DEFAULT_CUSHION, d.cushion);
-      sortInventory(); persistInventory(); persistCushion();
-      renderInventory(); renderCushion();
+      if (d.multipliers) MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS, d.multipliers);
+      sortInventory(); persistInventory(); persistCushion(); persistMultipliers();
+      renderInventory(); renderCushion(); renderMultipliers();
       alert(`Imported ${INVENTORY.length} boxes successfully.`);
     } catch (err) {
       alert('Could not import backup: ' + err.message);
@@ -1102,8 +2048,9 @@ function restoreDefaults() {
   if (!confirm('Restore the original box list, packing prices, and cushions? This replaces your current settings on this device.')) return;
   INVENTORY = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
   CUSHION = Object.assign({}, DEFAULT_CUSHION);
-  sortInventory(); persistInventory(); persistCushion();
-  renderInventory(); renderCushion();
+  MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS);
+  sortInventory(); persistInventory(); persistCushion(); persistMultipliers();
+  renderInventory(); renderCushion(); renderMultipliers();
   flashSaved('Defaults restored ✓');
 }
 
@@ -1126,16 +2073,36 @@ $('cushion-grid').addEventListener('input', e => {
     if ($('box-result').classList.contains('show') || $('box-no-match').classList.contains('show')) find();
   }
 });
+$('mult-grid').addEventListener('input', e => {
+  const inp = e.target.closest('input[data-level]');
+  if (!inp) return;
+  const v = parseFloat(inp.value);
+  if (!isNaN(v) && v >= 0) {
+    MULTIPLIERS[inp.dataset.level] = v;
+    persistMultipliers(); flashSaved();
+    if ($('cb-price').classList.contains('show')) cbGenerate();
+  }
+});
 $('export-btn').addEventListener('click', exportBackup);
 $('import-btn').addEventListener('click', () => $('import-file').click());
 $('import-file').addEventListener('change', e => { if (e.target.files[0]) importBackup(e.target.files[0]); e.target.value = ''; });
 $('reset-btn').addEventListener('click', restoreDefaults);
 $('save-all-btn').addEventListener('click', () => flashSaved());
 
+// Settings sub-section navigation
+$('set-nav').addEventListener('click', e => {
+  const btn = e.target.closest('.set-nav-btn'); if (!btn) return;
+  document.querySelectorAll('#set-nav .set-nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#settings .set-section').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  $(btn.dataset.sec).classList.add('active');
+});
+
 // Initial settings render
 sortInventory();
 renderInventory();
 renderCushion();
+renderMultipliers();
 
 /* Register the service worker for offline use (only works over http/https, e.g. GitHub Pages). */
 if ('serviceWorker' in navigator) {
