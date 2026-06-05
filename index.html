@@ -226,6 +226,12 @@
     border-radius: 8px; font-size: 13px; color: #9a3412;
   }
   .heavy-advisory.over { background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #ef4444; color: #b91c1c; }
+  .reshape-note {
+    margin-top: 12px; padding: 10px 12px;
+    background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #3b82f6;
+    border-radius: 8px; font-size: 13px; color: #1e40af;
+  }
+  .reshape-note strong { color: #1e3a8a; }
 
   .tag {
     display: inline-block; padding: 2px 8px; border-radius: 6px;
@@ -544,6 +550,9 @@
       </div>
       <div class="fit-note" id="res-fit-note"></div>
 
+      <!-- Reshape advisory -->
+      <div class="reshape-note" id="res-reshape" style="display:none;"></div>
+
       <!-- Heavy advisory -->
       <div class="heavy-advisory" id="res-heavy" style="display:none;"></div>
 
@@ -665,6 +674,7 @@
         <span><svg width="26" height="8" style="vertical-align:middle;margin-right:4px"><line x1="0" y1="4" x2="26" y2="4" stroke="#B22020" stroke-width="2" stroke-dasharray="6 3"/></svg>Cut line</span>
       </div>
       <div class="diagram-note" id="cb-diagram-note" style="display:none;"></div>
+      <button class="btn btn-sm btn-gold btn-block" id="cb-email" type="button" style="margin-top:14px;">📧 Email / Share Diagram</button>
     </div>
   </div>
 </div>
@@ -704,6 +714,7 @@
         <span><span style="display:inline-block;width:14px;height:10px;background:#F5C4B3;border:1.5px solid #993C1D;vertical-align:middle;margin-right:4px;border-radius:2px;"></span>Short sides</span>
         <span><svg width="26" height="8" style="vertical-align:middle;margin-right:4px"><line x1="0" y1="4" x2="26" y2="4" stroke="#16a34a" stroke-width="2" stroke-dasharray="5 3"/></svg>Large leftover</span>
       </div>
+      <button class="btn btn-sm btn-gold btn-block" id="bb-email" type="button" style="margin-top:14px;">📧 Email / Share Cut Layout</button>
     </div>
   </div>
 </div>
@@ -1044,25 +1055,82 @@ function fitBox(box, padded) {
   return best;
 }
 
+/* ── Box reshaping ────────────────────────────────────────────────────────
+   A corrugated carton can be re-scored (new fold lines) to change its base
+   footprint WITHOUT changing the material: the base perimeter 2×(L+W) is
+   conserved. So a 24×12 base (perimeter 72) can be re-folded to 28×8 (also
+   perimeter 72). Practically you can only make the box NARROWER (and longer):
+   the flaps are cut at half the original width, so on a narrower opening they
+   overlap (good); on a wider opening they would gap. Height is unchanged
+   (and can still be trimmed separately). Only standard cartons reshape —
+   not the Long tubes or rigid Art boxes.
+
+   Use it when: the item is longer & narrower than any stock footprint, but a
+   stock box has enough perimeter to be re-folded snugly around it — avoiding
+   a much larger box or a custom build. */
+const RESHAPEABLE = { 'Cubed': true, 'Non-Cubed': true };
+
+function tryReshape(box, padded) {
+  if (!RESHAPEABLE[box.cat]) return null;
+  const a = Math.max(box.l, box.w), b = Math.min(box.l, box.w), wallH = box.h;
+  const perim = a + b;
+  let best = null;
+  for (let p = 0; p < 3; p++) {                         // which padded dim stands vertical
+    const vNeed = padded[p];
+    if (wallH < vNeed) continue;                        // wall not tall enough to stand the item
+    const rest = padded.filter((_, i) => i !== p).sort((x, y) => y - x); // [f0, f1] desc
+    const f0 = rest[0], f1 = rest[1];
+    if (a >= f0 && b >= f1) continue;                   // already fits as-is → not a reshape
+    if (f1 > b + 1e-9) continue;                        // new width must be ≤ original (flaps cover)
+    const newLen = perim - f1;                          // conserve perimeter; width snug to item
+    if (newLen < f0 - 1e-9) continue;                   // not enough material for the length
+    const to = trimHeight(wallH, vNeed);                // height still trims in 2" steps
+    const cand = {
+      dims: [newLen, f1, to].sort((x, y) => y - x),
+      from: [a, b, wallH], to: [newLen, f1, to],
+      footArea: newLen * f1, finH: to, perim,
+      cut: to < wallH ? { from: wallH, to } : null
+    };
+    if (!best || cand.footArea < best.footArea) best = cand;
+  }
+  return best;
+}
+
 function findBoxes(L, W, H, level) {
   const cushion = CUSHION[level];
   const padded = [L, W, H].map(d => d + cushion * 2).sort((a, b) => b - a);
-  const matches = [];
+  const matches = [], reshapes = [];
   for (const box of INVENTORY) {
     if (typeof box.price !== 'number' || isNaN(box.price)) continue; // no price -> not quotable
+    // Long & Art are oversized specialty boxes — fall back to them only if nothing normal fits.
+    const specialty = (box.cat === 'Long' || box.cat === 'Art') ? 1 : 0;
+    const origVol = box.l * box.w * box.h;
     const fit = fitBox(box, padded);
-    if (fit) matches.push({
-      box, dims: fit.dims, cut: fit.cut, footArea: fit.footArea,
-      origVol: box.l * box.w * box.h,
-      // Long & Art are oversized specialty boxes — fall back to them only if nothing normal fits.
-      specialty: (box.cat === 'Long' || box.cat === 'Art') ? 1 : 0
-    });
+    if (fit) {
+      matches.push({ box, dims: fit.dims, cut: fit.cut, footArea: fit.footArea, reshape: null, origVol, specialty });
+    } else {
+      // No as-is fit — can we re-score (reshape) this carton to fit?
+      const rs = tryReshape(box, padded);
+      if (rs) reshapes.push({ box, dims: rs.dims, cut: rs.cut, footArea: rs.footArea, reshape: { from: rs.from, to: rs.to }, origVol, specialty });
+    }
   }
-  // Normal boxes first, by smallest L×W footprint; specialty (Long/Art) only as a
-  // fallback; then smaller original box, then lower price.
+
+  // Reshaping is extra labor, so only keep reshape options that earn it:
+  //  • a rescue — no standard box fits the item as-is, OR
+  //  • a real void saving — at least 35% snugger base than the best as-is box.
+  // This avoids suggesting a re-score when a simple stock box (maybe a height
+  // cut) already fits well.
+  const RESHAPE_GAIN = 0.65;                            // reshape area must be ≤ 65% of best as-is
+  const bestNormalArea = matches.reduce((m, x) => x.specialty ? m : Math.min(m, x.footArea), Infinity);
+  reshapes.forEach(rs => {
+    if (bestNormalArea === Infinity || rs.footArea <= RESHAPE_GAIN * bestNormalArea) matches.push(rs);
+  });
+
+  // Snuggest base footprint wins; specialty (Long/Art) boxes only as a fallback.
   matches.sort((a, b) =>
     (a.specialty - b.specialty) ||
     (a.footArea - b.footArea) ||
+    ((a.reshape ? 1 : 0) - (b.reshape ? 1 : 0)) ||
     (a.origVol - b.origVol) ||
     (a.box.pack[level] - b.box.pack[level])
   );
@@ -1136,12 +1204,23 @@ function renderResult(matches, level, weight, padded) {
   const b = best.box;
   const total = b.pack[level];   // all-in price (box included) for this level
 
-  // Full box size (what to pull & charge) and finished size after cutting the HEIGHT only.
+  // Full box size (what to pull & charge) and the finished size.
+  // Reshaped boxes get a new base (re-scored); otherwise only the HEIGHT is cut.
+  const r = best.reshape;
   const fullDims = dimsStr(b.l, b.w, b.h);
-  const finishedH = best.cut ? best.cut.to : b.h;
-  const finishedDims = dimsStr(b.l, b.w, finishedH);
+  const finL = r ? r.to[0] : b.l;
+  const finW = r ? r.to[1] : b.w;
+  const finishedH = r ? r.to[2] : (best.cut ? best.cut.to : b.h);
+  const finishedDims = dimsStr(finL, finW, finishedH);
 
-  if (best.cut) {
+  if (r) {
+    $('res-dims').innerHTML =
+      `<div class="cut-display">` +
+        `<div class="dim-block"><span class="dim-cap">Box to pull &amp; charge</span><span class="dim-main">${fullDims}</span></div>` +
+        `<span class="cut-sep">🔧</span>` +
+        `<div class="dim-block"><span class="dim-cap">Reshape to</span><span class="dim-main cut">${finishedDims}</span></div>` +
+      `</div>`;
+  } else if (best.cut) {
     $('res-dims').innerHTML =
       `<div class="cut-display">` +
         `<div class="dim-block"><span class="dim-cap">Box to pull &amp; charge</span><span class="dim-main">${fullDims}</span></div>` +
@@ -1162,12 +1241,16 @@ function renderResult(matches, level, weight, padded) {
   $('res-pack-label').textContent = `${level} Packing — All-In Price`;
   $('res-total').textContent = money(total);
 
-  // Fit note — cushion, plus height-only cut instruction or extra room
+  // Fit note — cushion, plus reshape / height-cut instruction or extra room
   const cushion = CUSHION[level];
   let note = cushion > 0
     ? `${level} packing · ${fmt(cushion)}" cushion per side`
     : `${level} packing · no cushion (snug fit)`;
-  if (best.cut) {
+  if (r) {
+    note += ` · Re-score the base from ${fmt(b.l)}×${fmt(b.w)} to ${fmt(finL)}×${fmt(finW)}` +
+      (best.cut ? `, cut height to ${fmt(finishedH)}"` : '') +
+      ` — same box, charge the full ${fullDims} box in POS`;
+  } else if (best.cut) {
     note += ` · Cut height from ${fmt(best.cut.from)}" to ${fmt(best.cut.to)}" (trim ${fmt(best.cut.from - best.cut.to)}") — charge the full ${fullDims} box in POS`;
   } else {
     const extra = Math.max(b.l, b.w, b.h) - padded[0];
@@ -1175,8 +1258,21 @@ function renderResult(matches, level, weight, padded) {
   }
   $('res-fit-note').textContent = note;
 
-  // CMS / shipping dims = finished (cut) box + 1" each
-  $('res-cms').textContent = dimsStr(b.l + 1, b.w + 1, finishedH + 1);
+  // Reshape callout — explains the re-score technique
+  const reshapeEl = $('res-reshape');
+  if (r) {
+    reshapeEl.style.display = 'block';
+    reshapeEl.innerHTML =
+      `🔧 &nbsp;<strong>Reshape this box.</strong> No stock box fits this item as-is, but the ` +
+      `${fmt(b.l)}×${fmt(b.w)} base has the same perimeter as ${fmt(finL)}×${fmt(finW)}. ` +
+      `Re-score the fold lines to make it <strong>narrower &amp; longer</strong> (${fmt(finL)}×${fmt(finW)}×${fmt(finishedH)}") ` +
+      `for a snug fit — the flaps still meet, no extra material needed.`;
+  } else {
+    reshapeEl.style.display = 'none';
+  }
+
+  // CMS / shipping dims = finished box (reshaped/cut) + 1" each
+  $('res-cms').textContent = dimsStr(finL + 1, finW + 1, finishedH + 1);
 
   // Weight advisories. 275# boxes are rated to 65 lbs; warn when that's exceeded.
   // Non-275# boxes get the heavy-item advisory at 40+ lbs.
@@ -1208,7 +1304,9 @@ function renderResult(matches, level, weight, padded) {
     $('res-alt-list').innerHTML = alts.map(m => {
       const mb = m.box;
       const full = dimsStr(mb.l, mb.w, mb.h);
-      const label = m.cut ? `${full} ✂️ ${dimsStr(mb.l, mb.w, m.cut.to)}` : full;
+      const label = m.reshape
+        ? `${full} 🔧 ${dimsStr(m.reshape.to[0], m.reshape.to[1], m.reshape.to[2])}`
+        : (m.cut ? `${full} ✂️ ${dimsStr(mb.l, mb.w, m.cut.to)}` : full);
       return `<div class="alt-box-row">
         <span>${label}</span>
         <span class="alt-meta">${money(mb.pack[level])} all-in</span>
@@ -2109,6 +2207,105 @@ sortInventory();
 renderInventory();
 renderCushion();
 renderMultipliers();
+
+/* ---- Email / Share diagrams ---------------------------------------------
+   mailto: cannot carry image attachments, so we render each on-screen SVG to
+   a PNG and use the Web Share API (iOS Safari shows Mail with the image
+   attached). If sharing files isn't supported, we download the PNG(s) and
+   open a pre-filled email so the associate can attach them manually. */
+const STORE_EMAIL = 'store2899@theupsstore.com';
+
+function collectSvgs(...ids) {
+  const out = [];
+  ids.forEach(id => {
+    const el = $(id);
+    if (el && el.offsetParent !== null) el.querySelectorAll('svg').forEach(s => out.push(s));
+  });
+  return out;
+}
+
+// Render one SVG onto a 4×6 (2:3) photo canvas at 300 DPI. The canvas is
+// oriented (portrait vs landscape) to match the diagram so it fills the frame
+// with minimal white margin, and the diagram is scaled to "contain" + centered.
+function svgToPngBlob(svgEl) {
+  return new Promise(resolve => {
+    const vb = (svgEl.getAttribute('viewBox') || '0 0 680 680').split(/[\s,]+/).map(Number);
+    const w = vb[2] || svgEl.clientWidth || 680, h = vb[3] || svgEl.clientHeight || 680;
+    const clone = svgEl.cloneNode(true);
+    clone.setAttribute('width', w); clone.setAttribute('height', h);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const xml = new XMLSerializer().serializeToString(clone);
+    const url = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(xml)));
+    const img = new Image();
+    img.onload = () => {
+      const SHORT = 1200, LONG = 1800;                 // 4in × 6in @ 300 DPI
+      const landscape = (w / h) > 1;
+      const cw = landscape ? LONG : SHORT;
+      const ch = landscape ? SHORT : LONG;
+      const c = document.createElement('canvas');
+      c.width = cw; c.height = ch;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
+      const pad = 24;                                  // small print-safe margin
+      const s = Math.min((cw - pad * 2) / w, (ch - pad * 2) / h);
+      const dw = w * s, dh = h * s;
+      ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+      c.toBlob(b => resolve(b), 'image/png');
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+async function shareDiagram(svgs, filebase, subject, body) {
+  if (!svgs.length) { alert('Generate a diagram first.'); return; }
+  const files = [];
+  for (let i = 0; i < svgs.length; i++) {
+    const blob = await svgToPngBlob(svgs[i]);
+    if (blob) files.push(new File([blob], svgs.length > 1 ? `${filebase}-${i + 1}.png` : `${filebase}.png`, { type: 'image/png' }));
+  }
+  if (files.length && navigator.canShare && navigator.canShare({ files })) {
+    try { await navigator.share({ files, title: subject, text: body }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; /* fall through on real failure */ }
+  }
+  // Fallback: download the image(s), then open a pre-filled email.
+  files.forEach(f => {
+    const url = URL.createObjectURL(f);
+    const a = document.createElement('a');
+    a.href = url; a.download = f.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  });
+  const note = files.length
+    ? `\n\n(The diagram image${files.length > 1 ? 's were' : ' was'} saved to this device — attach ${files.length > 1 ? 'them' : 'it'} to this email.)`
+    : '';
+  location.href = `mailto:${STORE_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body + note)}`;
+}
+
+$('cb-email').addEventListener('click', () => {
+  const dims = [$('cb-d1').value, $('cb-d2').value, $('cb-d3').value].filter(v => v !== '').join(' × ');
+  const isItem = $('cb-dimtype').value === 'item';
+  const title = ($('cb-diagram-title').textContent || 'Custom Box Diagram').trim();
+  const body =
+    `${title}\n` +
+    (dims ? `${isItem ? 'Item' : 'Finished box'} dimensions: ${dims}"\n` : '') +
+    ($('cb-weight').value ? `Weight: ${$('cb-weight').value} lbs\n` : '') +
+    `Pack level: ${typeof cbLevel !== 'undefined' ? cbLevel : ''}\n\n` +
+    `Cut & fold diagram from the Packing Tools app.`;
+  shareDiagram(collectSvgs('cb-diagram', 'cb-diagram2'), 'custom-box-diagram', 'Custom Box — Cut & Fold Diagram', body);
+});
+
+$('bb-email').addEventListener('click', () => {
+  const dims = [$('bb-l').value, $('bb-w').value, $('bb-h').value].filter(v => v !== '').join(' × ');
+  const body =
+    `Blue Board Cut Layout\n` +
+    (dims ? `Box dimensions: ${dims}"\n` : '') +
+    `Top & Bottom: ${$('bb-p-tb').textContent}\n` +
+    `Long sides: ${$('bb-p-long').textContent}\n` +
+    `Short sides: ${$('bb-p-short').textContent}\n\n` +
+    `Cut layout from the Packing Tools app.`;
+  shareDiagram(collectSvgs('bb-sheets'), 'blue-board-layout', 'Blue Board — Cut Layout', body);
+});
 
 /* Register the service worker for offline use (only works over http/https, e.g. GitHub Pages). */
 if ('serviceWorker' in navigator) {

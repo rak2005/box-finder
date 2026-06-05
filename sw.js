@@ -1,7 +1,7 @@
 /* UPS Store Team Tools — service worker (offline support).
    Bump CACHE (v1 -> v2 …) whenever you change index.html or icons so phones
    pick up the new version. */
-const CACHE = 'ups-team-tools-v9';
+const CACHE = 'ups-team-tools-v12';
 const ASSETS = [
   './',
   './index.html',
