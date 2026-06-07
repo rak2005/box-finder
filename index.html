@@ -42,7 +42,7 @@
     background: #FFB500;
     border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 10px; line-height: 1.2;
+    font-weight: 800; font-size: 18px; line-height: 1; letter-spacing: 0.5px;
     text-align: center; color: #351C15;
   }
   .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
@@ -145,6 +145,8 @@
   }
   .pill:hover { border-color: #009CBD; color: #009CBD; }
   .pill.selected { border-color: #009CBD; background: #009CBD; color: white; box-shadow: 0 2px 8px rgba(0,156,189,0.2); }
+  .pill-group.needs-pick { outline: 2px solid #ef4444; outline-offset: 4px; border-radius: 10px; }
+  .pill-group.needs-pick::after { content: "Pick a packing level"; flex-basis: 100%; font-size: 12px; font-weight: 600; color: #dc2626; }
 
   /* Result Areas */
   .result-empty {
@@ -381,7 +383,7 @@
   @media (max-width: 600px) {
     .form-group label { font-size: 10px; letter-spacing: 0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .header { padding: 10px 16px; padding-top: calc(10px + env(safe-area-inset-top)); gap: 12px; }
-    .header-logo { width: 38px; height: 38px; font-size: 9px; border-radius: 8px; }
+    .header-logo { width: 38px; height: 38px; font-size: 16px; border-radius: 8px; }
     .header h1 { font-size: 17px; }
     .header p { font-size: 11px; }
 
@@ -428,7 +430,7 @@
 
 <!-- Header -->
 <div class="header">
-  <div class="header-logo">UPS<br>STORE</div>
+  <div class="header-logo">PT</div>
   <div>
     <h1>Packing Tools</h1>
   </div>
@@ -504,7 +506,8 @@
       <label>Packing Level</label>
       <div class="pill-group" id="pack-pills">
         <div class="pill" data-level="Basic">Basic</div>
-        <div class="pill selected" data-level="Standard">Standard</div>
+        <div class="pill" data-level="Standard 2&quot;">Standard 2"</div>
+        <div class="pill" data-level="Standard 3&quot;">Standard 3"</div>
         <div class="pill" data-level="Fragile">Fragile</div>
         <div class="pill" data-level="Custom">Custom</div>
       </div>
@@ -636,7 +639,7 @@
       <label>Packing Level</label>
       <div class="pill-group" id="cb-pills">
         <div class="pill" data-level="Basic">Basic</div>
-        <div class="pill selected" data-level="Standard">Standard</div>
+        <div class="pill" data-level="Standard">Standard</div>
         <div class="pill" data-level="Fragile">Fragile</div>
         <div class="pill" data-level="Custom">Custom</div>
         <div class="pill" data-level="Blue Board">Blue Board</div>
@@ -912,12 +915,19 @@ const DEFAULT_INVENTORY = [
 
 // Default cushion per side — editable in Settings, persisted to localStorage.
 // Blue Board (≈ board thickness) is editable too; Box Only is always 0 (build to size).
-const DEFAULT_CUSHION = { Basic:0, Standard:1.5, Fragile:2, Custom:3, 'Blue Board':3 };
-const CUSHION_KEYS = ['Basic', 'Standard', 'Fragile', 'Custom', 'Blue Board'];
+// Box Finder levels: "Standard 2\"" = 1" cushion per side (2" total per axis),
+// "Standard 3\"" = 1.5" per side (3" total). Plain "Standard" (1.5"/side) is kept
+// for the Custom Box tab. Both Standard 2"/3" quote the Standard price column.
+const DEFAULT_CUSHION = { Basic:0, 'Standard 2"':1, 'Standard 3"':1.5, Standard:1.5, Fragile:2, Custom:3, 'Blue Board':3 };
+const CUSHION_KEYS = ['Basic', 'Standard 2"', 'Standard 3"', 'Fragile', 'Custom', 'Blue Board'];
 // Boxes that can be trimmed shorter (in 2" steps, min 4" final height).
 const CUTTABLE = { 'Cubed': true, 'Non-Cubed': true, 'Long': true };
 const CUT_STEP = 2, CUT_MIN_HEIGHT = 4;
+// Inventory price columns (each box stores an all-in price per column).
 const PACK_LEVELS = ['Basic','Standard','Fragile','Custom'];
+// Map a Box-Finder packing level to the inventory price column it charges.
+const PACK_PRICE_KEY = { 'Standard 2"': 'Standard', 'Standard 3"': 'Standard' };
+const packPrice = (box, level) => box.pack[PACK_PRICE_KEY[level] || level];
 
 const CAT_TAG = {
   'Cubed':'tag-green', 'Non-Cubed':'tag-blue', 'Art':'tag-gray',
@@ -966,7 +976,7 @@ function persistMultipliers() { safeSet('ups.multipliers', JSON.stringify(MULTIP
 
 // One-time: re-apply the official multiplier + cushion defaults from the Box Building
 // Guidelines (overriding any previously-saved placeholder values). Box inventory is untouched.
-const PRICING_DEFAULTS_VERSION = '2026-06-guidelines-2';
+const PRICING_DEFAULTS_VERSION = '2026-06-guidelines-3';
 if (safeGet('ups.pricingDefaultsV') !== PRICING_DEFAULTS_VERSION) {
   MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS);
   CUSHION = Object.assign({}, DEFAULT_CUSHION);
@@ -998,7 +1008,7 @@ function fmt(n) {                    // tidy number: 5.5 stays, 6.0 -> 6
 }
 function dimsStr(a, b, c) { return `${fmt(a)} × ${fmt(b)} × ${fmt(c)}`; }
 
-let selectedLevel = 'Standard';
+let selectedLevel = null;   // no default — a packing level must be chosen
 
 /* ════════════════ MATCHING LOGIC ════════════════
    1. padded_dim = item_dim + cushion×2 (each side)
@@ -1055,84 +1065,103 @@ function fitBox(box, padded) {
   return best;
 }
 
-/* ── Box reshaping ────────────────────────────────────────────────────────
-   A corrugated carton can be re-scored (new fold lines) to change its base
-   footprint WITHOUT changing the material: the base perimeter 2×(L+W) is
-   conserved. So a 24×12 base (perimeter 72) can be re-folded to 28×8 (also
-   perimeter 72). Practically you can only make the box NARROWER (and longer):
-   the flaps are cut at half the original width, so on a narrower opening they
-   overlap (good); on a wider opening they would gap. Height is unchanged
-   (and can still be trimmed separately). Only standard cartons reshape —
-   not the Long tubes or rigid Art boxes.
+/* ── Box reshaping (Notion spec §4.5 / §4.6) ───────────────────────────────
+   A corrugated carton can be re-creased to a different base rectangle that has
+   the SAME perimeter (whatever is added to one base side is subtracted from the
+   other). Material and wall height are unchanged. Either side may grow, e.g.
+   24×12 → 22×14 OR 24×12 → 28×8. Only standard cartons reshape (Cubed,
+   Non-Cubed); the Long tubes and rigid Art boxes do not.
 
-   Use it when: the item is longer & narrower than any stock footprint, but a
-   stock box has enough perimeter to be re-folded snugly around it — avoiding
-   a much larger box or a custom build. */
+   Reshaping is extra labor, so a geometric fit isn't enough — it must clear the
+   §4.6 "worth-it" gate: the stock box must be wastefully empty AND the reshape
+   must meaningfully cut billable dimensional weight (what the customer pays). */
 const RESHAPEABLE = { 'Cubed': true, 'Non-Cubed': true };
+const RESHAPE_MIN_STEP = 2;     // never reshape by less than 2"
+const RESHAPE_MIN_SHORT = 6;    // never take a base side below 6"
+const VOID_THRESHOLD = 0.40;    // stock box must be > 40% empty to consider reshape
+const DIM_DIVISOR = 139;        // domestic dimensional-weight divisor
+const DW_MIN_DROP_LB = 2;       // reshape must save ≥ 2 billable lb …
+const DW_MIN_DROP_PCT = 0.10;   // … and ≥ 10%
 
-function tryReshape(box, padded) {
+const reshapeFloor = d => Math.max(RESHAPE_MIN_SHORT, d / 2);        // §4.5 short-side floor
+const dimWeight = (l, w, h) => Math.ceil((l * w * h) / DIM_DIVISOR); // outer dims (already +1"/side)
+
+// Best legal reshape of a box that holds the padded item, minimizing billable
+// dim weight (tie → smaller base area). Returns a candidate or null.
+function reshapeCandidate(box, padded) {
   if (!RESHAPEABLE[box.cat]) return null;
-  const a = Math.max(box.l, box.w), b = Math.min(box.l, box.w), wallH = box.h;
-  const perim = a + b;
+  const P = box.l + box.w;                              // conserved perimeter
+  const floorL = reshapeFloor(box.l), floorW = reshapeFloor(box.w);
   let best = null;
   for (let p = 0; p < 3; p++) {                         // which padded dim stands vertical
     const vNeed = padded[p];
-    if (wallH < vNeed) continue;                        // wall not tall enough to stand the item
-    const rest = padded.filter((_, i) => i !== p).sort((x, y) => y - x); // [f0, f1] desc
-    const f0 = rest[0], f1 = rest[1];
-    if (a >= f0 && b >= f1) continue;                   // already fits as-is → not a reshape
-    if (f1 > b + 1e-9) continue;                        // new width must be ≤ original (flaps cover)
-    const newLen = perim - f1;                          // conserve perimeter; width snug to item
-    if (newLen < f0 - 1e-9) continue;                   // not enough material for the length
-    const to = trimHeight(wallH, vNeed);                // height still trims in 2" steps
-    const cand = {
-      dims: [newLen, f1, to].sort((x, y) => y - x),
-      from: [a, b, wallH], to: [newLen, f1, to],
-      footArea: newLen * f1, finH: to, perim,
-      cut: to < wallH ? { from: wallH, to } : null
-    };
-    if (!best || cand.footArea < best.footArea) best = cand;
+    if (box.h < vNeed - 1e-9) continue;                 // wall height can't grow
+    const finH = trimHeight(box.h, vNeed);              // height still trims in 2" steps (§4)
+    const rest = padded.filter((_, i) => i !== p).sort((x, y) => y - x);
+    const needL = rest[0], needW = rest[1];             // base footprint needed
+    if (needL + needW > P + 1e-9) continue;             // can't add perimeter
+    const lo = Math.max(Math.ceil(needL - 1e-9), Math.ceil(floorL - 1e-9));
+    const hi = Math.floor(P - Math.max(needW, floorW) + 1e-9);
+    for (let nL = lo; nL <= hi; nL++) {                 // sweep longer reshaped side, whole inches
+      const nW = P - nL;
+      if (nW < needW - 1e-9 || nW < floorW - 1e-9 || nL < floorL - 1e-9) continue;
+      if (Math.abs(nL - box.l) < RESHAPE_MIN_STEP - 1e-9) continue;  // real reshape only (≥ 2")
+      const dw = dimWeight(nL + 1, nW + 1, finH + 1), area = nL * nW;
+      if (!best || dw < best.dw || (dw === best.dw && area < best.area)) {
+        best = {
+          dims: [nL, nW, finH].sort((x, y) => y - x), from: [box.l, box.w, box.h], to: [nL, nW, finH],
+          footArea: area, finH, dw, area, cut: finH < box.h ? { from: box.h, to: finH } : null
+        };
+      }
+    }
   }
   return best;
 }
 
-function findBoxes(L, W, H, level) {
+// §4.6 worth-it gate: should this box ship as a reshape instead of its as-is fit?
+function reshapeWorthIt(stock, rc, paddedVol, weight) {
+  if (!stock) return true;                              // rescue — reshape is this box's only fit
+  const boxVol = stock.dims[0] * stock.dims[1] * stock.dims[2];   // finished interior
+  if ((boxVol - paddedVol) / boxVol <= VOID_THRESHOLD) return false;        // step 1: not wasteful enough
+  const dwStock = dimWeight(stock.dims[0] + 1, stock.dims[1] + 1, stock.dims[2] + 1);
+  const drop = dwStock - rc.dw;                          // step 2: real dim-weight savings
+  if (!(drop >= DW_MIN_DROP_LB && drop >= dwStock * DW_MIN_DROP_PCT)) return false;
+  if (weight != null && !isNaN(weight) && weight >= rc.dw) return false;    // step 3: billed on actual wt
+  return true;
+}
+
+function findBoxes(L, W, H, level, weight) {
   const cushion = CUSHION[level];
   const padded = [L, W, H].map(d => d + cushion * 2).sort((a, b) => b - a);
-  const matches = [], reshapes = [];
+  const paddedVol = padded[0] * padded[1] * padded[2];
+  const matches = [];
   for (const box of INVENTORY) {
     if (typeof box.price !== 'number' || isNaN(box.price)) continue; // no price -> not quotable
-    // Long & Art are oversized specialty boxes — fall back to them only if nothing normal fits.
+    // Long & Art are oversized specialty boxes — fall back to them only if nothing standard fits.
     const specialty = (box.cat === 'Long' || box.cat === 'Art') ? 1 : 0;
     const origVol = box.l * box.w * box.h;
-    const fit = fitBox(box, padded);
-    if (fit) {
-      matches.push({ box, dims: fit.dims, cut: fit.cut, footArea: fit.footArea, reshape: null, origVol, specialty });
-    } else {
-      // No as-is fit — can we re-score (reshape) this carton to fit?
-      const rs = tryReshape(box, padded);
-      if (rs) reshapes.push({ box, dims: rs.dims, cut: rs.cut, footArea: rs.footArea, reshape: { from: rs.from, to: rs.to }, origVol, specialty });
+    const stock = fitBox(box, padded);                  // as-is footprint fit (may height-cut) or null
+    const rc = reshapeCandidate(box, padded);           // best legal reshape or null
+
+    let chosen = null, reshape = null;
+    if (rc && reshapeWorthIt(stock, rc, paddedVol, weight)) {
+      chosen = rc; reshape = { from: rc.from, to: rc.to };   // reshape earns its labor
+    } else if (stock) {
+      chosen = stock;                                   // plain stock fit (maybe height-cut)
     }
+    if (chosen) matches.push({ box, dims: chosen.dims, cut: chosen.cut, footArea: chosen.footArea, reshape, origVol, specialty });
   }
 
-  // Reshaping is extra labor, so only keep reshape options that earn it:
-  //  • a rescue — no standard box fits the item as-is, OR
-  //  • a real void saving — at least 35% snugger base than the best as-is box.
-  // This avoids suggesting a re-score when a simple stock box (maybe a height
-  // cut) already fits well.
-  const RESHAPE_GAIN = 0.65;                            // reshape area must be ≤ 65% of best as-is
-  const bestNormalArea = matches.reduce((m, x) => x.specialty ? m : Math.min(m, x.footArea), Infinity);
-  reshapes.forEach(rs => {
-    if (bestNormalArea === Infinity || rs.footArea <= RESHAPE_GAIN * bestNormalArea) matches.push(rs);
-  });
-
-  // Snuggest base footprint wins; specialty (Long/Art) boxes only as a fallback.
+  // §4.5 ranking: a clean as-is fit always beats a reshape (a box only stays
+  // "clean" when §4.6 judged it already snug — a wasteful box was converted to
+  // a reshape above). Specialty Long/Art last. Then snuggest footprint, smaller
+  // box, lower price.
   matches.sort((a, b) =>
     (a.specialty - b.specialty) ||
-    (a.footArea - b.footArea) ||
     ((a.reshape ? 1 : 0) - (b.reshape ? 1 : 0)) ||
+    (a.footArea - b.footArea) ||
     (a.origVol - b.origVol) ||
-    (a.box.pack[level] - b.box.pack[level])
+    (packPrice(a.box, level) - packPrice(b.box, level))
   );
   return { padded, cushion, matches };
 }
@@ -1175,13 +1204,22 @@ function find(record) {
     return;
   }
 
+  if (!selectedLevel) {                 // require a packing-level choice
+    $('box-result').classList.remove('show');
+    $('box-no-match').classList.remove('show');
+    $('box-empty').style.display = 'block';
+    if (record) $('pack-pills').classList.add('needs-pick');
+    return;
+  }
+  $('pack-pills').classList.remove('needs-pick');
+
   if (record) {
     const wl = (weight !== null && !isNaN(weight)) ? ' · ' + fmt(weight) + 'lb' : '';
     histPush('bf', { label: `${fmt(L)}×${fmt(W)}×${fmt(H)}${wl} · ${selectedLevel}`,
       data: { L, W, H, weight: (weight !== null && !isNaN(weight)) ? weight : '', level: selectedLevel } });
   }
 
-  const { padded, cushion, matches } = findBoxes(L, W, H, selectedLevel);
+  const { padded, cushion, matches } = findBoxes(L, W, H, selectedLevel, weight);
   $('box-empty').style.display = 'none';
 
   if (matches.length === 0) {
@@ -1202,7 +1240,7 @@ function find(record) {
 function renderResult(matches, level, weight, padded) {
   const best = matches[0];
   const b = best.box;
-  const total = b.pack[level];   // all-in price (box included) for this level
+  const total = packPrice(b, level);   // all-in price (box included) for this level
 
   // Full box size (what to pull & charge) and the finished size.
   // Reshaped boxes get a new base (re-scored); otherwise only the HEIGHT is cut.
@@ -1263,10 +1301,10 @@ function renderResult(matches, level, weight, padded) {
   if (r) {
     reshapeEl.style.display = 'block';
     reshapeEl.innerHTML =
-      `🔧 &nbsp;<strong>Reshape this box.</strong> No stock box fits this item as-is, but the ` +
-      `${fmt(b.l)}×${fmt(b.w)} base has the same perimeter as ${fmt(finL)}×${fmt(finW)}. ` +
-      `Re-score the fold lines to make it <strong>narrower &amp; longer</strong> (${fmt(finL)}×${fmt(finW)}×${fmt(finishedH)}") ` +
-      `for a snug fit — the flaps still meet, no extra material needed.`;
+      `🔧 &nbsp;<strong>Reshape this box.</strong> Re-crease the ${fmt(b.l)}×${fmt(b.w)} base to ` +
+      `<strong>${fmt(finL)}×${fmt(finW)}</strong> — same perimeter, same material (whatever you add to ` +
+      `one side comes off the other). Build it as ${fmt(finL)}×${fmt(finW)}×${fmt(finishedH)}" for a snugger, ` +
+      `cheaper-to-ship box. No extra board needed.`;
   } else {
     reshapeEl.style.display = 'none';
   }
@@ -1296,8 +1334,8 @@ function renderResult(matches, level, weight, padded) {
     heavyEl.classList.remove('over');
   }
 
-  // Alternatives (up to 3)
-  const alts = matches.slice(1, 4);
+  // Alternatives (just the single next-best option)
+  const alts = matches.slice(1, 2);
   const altsWrap = $('res-alts');
   if (alts.length) {
     altsWrap.style.display = 'block';
@@ -1309,7 +1347,7 @@ function renderResult(matches, level, weight, padded) {
         : (m.cut ? `${full} ✂️ ${dimsStr(mb.l, mb.w, m.cut.to)}` : full);
       return `<div class="alt-box-row">
         <span>${label}</span>
-        <span class="alt-meta">${money(mb.pack[level])} all-in</span>
+        <span class="alt-meta">${money(packPrice(mb, level))} all-in</span>
       </div>`;
     }).join('');
   } else {
@@ -1369,6 +1407,7 @@ $('pack-pills').addEventListener('click', e => {
   if (!pill) return;
   document.querySelectorAll('#pack-pills .pill').forEach(p => p.classList.remove('selected'));
   pill.classList.add('selected');
+  $('pack-pills').classList.remove('needs-pick');
   selectedLevel = pill.dataset.level;
   if ($('box-result').classList.contains('show') || $('box-no-match').classList.contains('show')) find();
 });
@@ -1408,7 +1447,7 @@ document.querySelectorAll('#box-finder input').forEach(inp => {
    Spec: Notion "Custom Box Notes" & "Custom Box Logic".
 ═══════════════════════════════════════════════════════ */
 const r2 = x => Math.round(x * 100) / 100;
-let cbLevel = 'Standard';
+let cbLevel = null;   // no default — a packing level must be chosen
 
 /* ---- Price: ceil((L+W+H) × multiplier) ---- */
 function cbPrice(L, W, H, m) {
@@ -1612,6 +1651,14 @@ function cbGenerate(record) {
     $('cb-not-feasible').classList.remove('show');
     return;
   }
+  if (!cbLevel) {                       // require a packing-level choice
+    $('cb-price').classList.remove('show');
+    $('cb-diagram-wrap').classList.remove('show');
+    $('cb-not-feasible').classList.remove('show');
+    if (record) $('cb-pills').classList.add('needs-pick');
+    return;
+  }
+  $('cb-pills').classList.remove('needs-pick');
   if (record) {
     const wl = (weight !== null && !isNaN(weight)) ? ' · ' + fmt(weight) + 'lb' : '';
     histPush('cb', { label: `${fmt(d[0])}×${fmt(d[1])}×${fmt(d[2])}${wl} · ${cbLevel}`,
@@ -1691,6 +1738,7 @@ function cbHeavyCheck() {
 }
 function cbSetLevel(level) {
   cbLevel = level;
+  $('cb-pills').classList.remove('needs-pick');
   document.querySelectorAll('#cb-pills .pill').forEach(p => p.classList.toggle('selected', p.dataset.level === level));
   cbUpdateDimHint(); cbHeavyCheck();
   if (cbResultShowing()) cbGenerate();
@@ -2099,7 +2147,7 @@ function renderCushion() {
   $('cushion-grid').innerHTML = CUSHION_KEYS.map(lv => `
     <div class="pack-price-item">
       <div><div class="ppi-label">${lv}</div><div class="ppi-sub">${lv === 'Blue Board' ? 'board reinforcement, per side' : 'inches per side'}</div></div>
-      <div class="ppi-input"><input type="number" inputmode="decimal" min="0" step="0.25" data-level="${lv}" value="${CUSHION[lv]}">"</div>
+      <div class="ppi-input"><input type="number" inputmode="decimal" min="0" step="0.25" data-level="${lv.replace(/"/g, '&quot;')}" value="${CUSHION[lv]}">"</div>
     </div>`).join('');
 }
 
@@ -2225,8 +2273,8 @@ function collectSvgs(...ids) {
 }
 
 // Render one SVG onto a 4×6 (2:3) photo canvas at 300 DPI. The canvas is
-// oriented (portrait vs landscape) to match the diagram so it fills the frame
-// with minimal white margin, and the diagram is scaled to "contain" + centered.
+// fixed PORTRAIT 4×6 (1200×1800 @ 300 DPI). The diagram is scaled to "contain"
+// and centered. Always portrait so the share/print comes out as a 4×6 photo.
 function svgToPngBlob(svgEl) {
   return new Promise(resolve => {
     const vb = (svgEl.getAttribute('viewBox') || '0 0 680 680').split(/[\s,]+/).map(Number);
@@ -2238,18 +2286,45 @@ function svgToPngBlob(svgEl) {
     const url = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(xml)));
     const img = new Image();
     img.onload = () => {
-      const SHORT = 1200, LONG = 1800;                 // 4in × 6in @ 300 DPI
-      const landscape = (w / h) > 1;
-      const cw = landscape ? LONG : SHORT;
-      const ch = landscape ? SHORT : LONG;
+      // 1) Rasterize at native size and find the tight bounding box of the
+      //    actual drawing, so the SVG's own empty padding doesn't become margin.
+      const tmp = document.createElement('canvas');
+      tmp.width = Math.max(1, Math.round(w)); tmp.height = Math.max(1, Math.round(h));
+      const tctx = tmp.getContext('2d');
+      tctx.fillStyle = '#ffffff'; tctx.fillRect(0, 0, tmp.width, tmp.height);
+      tctx.drawImage(img, 0, 0, tmp.width, tmp.height);
+      let sx = 0, sy = 0, sw = tmp.width, sh = tmp.height;
+      try {
+        const data = tctx.getImageData(0, 0, tmp.width, tmp.height).data;
+        let minX = tmp.width, minY = tmp.height, maxX = -1, maxY = -1;
+        for (let y = 0; y < tmp.height; y++) {
+          for (let x = 0; x < tmp.width; x++) {
+            const i = (y * tmp.width + x) * 4;
+            // non-white (any channel meaningfully below 255) counts as content
+            if (data[i] < 248 || data[i + 1] < 248 || data[i + 2] < 248) {
+              if (x < minX) minX = x; if (x > maxX) maxX = x;
+              if (y < minY) minY = y; if (y > maxY) maxY = y;
+            }
+          }
+        }
+        if (maxX >= minX && maxY >= minY) {
+          const m = 4;                                 // few px breathing room around the ink
+          minX = Math.max(0, minX - m); minY = Math.max(0, minY - m);
+          maxX = Math.min(tmp.width - 1, maxX + m); maxY = Math.min(tmp.height - 1, maxY + m);
+          sx = minX; sy = minY; sw = maxX - minX + 1; sh = maxY - minY + 1;
+        }
+      } catch (e) { /* getImageData unavailable — fall back to full frame */ }
+
+      // 2) Scale that crop to fill a 4×6 portrait frame (contain + centered).
+      const cw = 1200, ch = 1800;                      // 4in × 6in portrait @ 300 DPI
       const c = document.createElement('canvas');
       c.width = cw; c.height = ch;
       const ctx = c.getContext('2d');
       ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
       const pad = 24;                                  // small print-safe margin
-      const s = Math.min((cw - pad * 2) / w, (ch - pad * 2) / h);
-      const dw = w * s, dh = h * s;
-      ctx.drawImage(img, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
+      const s = Math.min((cw - pad * 2) / sw, (ch - pad * 2) / sh);
+      const dw = sw * s, dh = sh * s;
+      ctx.drawImage(img, sx, sy, sw, sh, (cw - dw) / 2, (ch - dh) / 2, dw, dh);
       c.toBlob(b => resolve(b), 'image/png');
     };
     img.onerror = () => resolve(null);
