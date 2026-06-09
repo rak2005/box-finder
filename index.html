@@ -526,6 +526,7 @@
       <div class="nm-icon">📭</div>
       <strong>No stock box fits this item</strong>
       <span id="no-match-detail"></span>
+      <button class="btn btn-primary btn-block" id="nm-custom-btn" type="button" style="margin-top:14px;">✂️ Build a Custom Box with these dimensions</button>
     </div>
 
     <!-- Result -->
@@ -639,7 +640,8 @@
       <label>Packing Level</label>
       <div class="pill-group" id="cb-pills">
         <div class="pill" data-level="Basic">Basic</div>
-        <div class="pill" data-level="Standard">Standard</div>
+        <div class="pill" data-level="Standard 2&quot;">Standard 2"</div>
+        <div class="pill" data-level="Standard 3&quot;">Standard 3"</div>
         <div class="pill" data-level="Fragile">Fragile</div>
         <div class="pill" data-level="Custom">Custom</div>
         <div class="pill" data-level="Blue Board">Blue Board</div>
@@ -727,6 +729,7 @@
     <button class="set-nav-btn active" data-sec="set-boxes" type="button">📦 Box Inventory</button>
     <button class="set-nav-btn" data-sec="set-cushions" type="button">🛡️ Cushioning</button>
     <button class="set-nav-btn" data-sec="set-mult" type="button">✂️ Multipliers</button>
+    <button class="set-nav-btn" data-sec="set-sheets" type="button">📐 Sheet Sizes</button>
     <button class="set-nav-btn" data-sec="set-data" type="button">💾 Backup</button>
   </div>
 
@@ -822,6 +825,44 @@
   </div>
 
   </div><!-- /set-mult -->
+
+  <div class="set-section" id="set-sheets">
+  <!-- SHEET SIZES -->
+  <div class="card">
+    <div class="settings-section">
+      <h3>✂️ Cardboard Sheet <span class="sec-note">(Custom Box tab)</span></h3>
+      <p class="sec-desc">The flat cardboard sheet the Custom Box calculator lays the box layout onto.</p>
+      <div class="pack-price-grid">
+        <div class="pack-price-item">
+          <div><div class="ppi-label">Width</div><div class="ppi-sub">across the sheet</div></div>
+          <div class="ppi-input"><input type="number" inputmode="decimal" min="1" step="1" data-sheet="cardW" id="sheet-card-w">"</div>
+        </div>
+        <div class="pack-price-item">
+          <div><div class="ppi-label">Height</div><div class="ppi-sub">down the sheet</div></div>
+          <div class="ppi-input"><input type="number" inputmode="decimal" min="1" step="1" data-sheet="cardH" id="sheet-card-h">"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="settings-section">
+      <h3>🔷 Blue Board Sheet <span class="sec-note">(Blue Board tab)</span></h3>
+      <p class="sec-desc">The flat blue board sheet the Blue Board calculator nests the panels onto.</p>
+      <div class="pack-price-grid">
+        <div class="pack-price-item">
+          <div><div class="ppi-label">Width</div><div class="ppi-sub">across the sheet</div></div>
+          <div class="ppi-input"><input type="number" inputmode="decimal" min="1" step="1" data-sheet="bbW" id="sheet-bb-w">"</div>
+        </div>
+        <div class="pack-price-item">
+          <div><div class="ppi-label">Height</div><div class="ppi-sub">down the sheet</div></div>
+          <div class="ppi-input"><input type="number" inputmode="decimal" min="1" step="1" data-sheet="bbH" id="sheet-bb-h">"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /set-sheets -->
 
   <div class="set-section" id="set-data">
   <!-- DATA MANAGEMENT -->
@@ -987,7 +1028,8 @@ if (safeGet('ups.pricingDefaultsV') !== PRICING_DEFAULTS_VERSION) {
 // Multiplier for a level given the resulting layout type ('single' | 'two' | 'infeasible').
 function cbMultiplier(level, layoutType) {
   if (level === 'Box Only' && layoutType === 'two') return MULTIPLIERS['Box Only 2-Part'];
-  return MULTIPLIERS[level];
+  // Standard 2"/3" price at the Standard multiplier (same as the Box Finder pricing).
+  return MULTIPLIERS[PACK_PRICE_KEY[level] || level];
 }
 
 // Cushion per side used by the Custom Box "add cushion" toggle. Shares the editable
@@ -998,7 +1040,13 @@ function cbCushionFor(level) {
 }
 
 // Custom Box cardboard sheet (inches).
-const SHEET_W = 50, SHEET_H = 80;
+// Flat sheet sizes (inches), editable in Settings → Sheet Sizes.
+const DEFAULT_SHEETS = { cardW: 50, cardH: 80, bbW: 48, bbH: 96 };
+let SHEETS = Object.assign({}, DEFAULT_SHEETS, loadJSON('ups.sheets', {}));
+function persistSheets() { safeSet('ups.sheets', JSON.stringify(SHEETS)); }
+function applySheets() { SHEET_W = SHEETS.cardW; SHEET_H = SHEETS.cardH; BB_SW = SHEETS.bbW; BB_SH = SHEETS.bbH; }
+let SHEET_W, SHEET_H, BB_SW, BB_SH;
+applySheets();
 
 /* ════════════════ HELPERS ════════════════ */
 const $ = id => document.getElementById(id);
@@ -1414,6 +1462,20 @@ $('pack-pills').addEventListener('click', e => {
 
 $('find-btn').addEventListener('click', () => find(true));
 
+// No-match → jump to Custom Box with the same dimensions & weight prefilled.
+$('nm-custom-btn').addEventListener('click', () => {
+  const { L, W, H, weight } = readDims();
+  $('cb-d1').value = isNaN(L) ? '' : L;
+  $('cb-d2').value = isNaN(W) ? '' : W;
+  $('cb-d3').value = isNaN(H) ? '' : H;
+  $('cb-weight').value = (weight !== null && !isNaN(weight)) ? weight : '';
+  $('cb-dimtype').value = 'item';   // Box Finder dimensions are the item being shipped
+  if (selectedLevel) cbSetLevel(selectedLevel);   // carry the chosen packing level over
+  else cbUpdateDimHint();
+  showTab('custom-box', document.querySelector('.tab-btn[onclick*="custom-box"]'));
+  cbGenerate(true);                 // dims + level prefilled → builds the box right away
+});
+
 // Clear dimensions + weight (keeps the selected packing level)
 function clearInputs() {
   ['in-length', 'in-width', 'in-height', 'in-weight'].forEach(id => {
@@ -1788,7 +1850,8 @@ cbUpdateDimHint();
    BLUE BOARD — 6 reinforcement panels packed on 48×96 sheets.
    Spec: Notion "Blue Board Notes" & "Blue Board Logic".
 ═══════════════════════════════════════════════════════ */
-const BB_SW = 48, BB_SH = 96;   // sheet width × height (inches)
+// BB_SW / BB_SH (blue board sheet width × height) are declared and loaded up top
+// with the other sheet sizes (editable in Settings → Sheet Sizes).
 
 // ---- Maximal-rectangles packer (reference algorithm) ----
 function bbPlaceRect(free, w, h) {              // lowest-then-leftmost free rect that fits
@@ -1986,9 +2049,9 @@ function bbBuildSheet(sheet, idx, total) {
   }
   // dimension arrows: width (top) + height (left)
   p += dimLine(x0, y0 - 10, x0 + sw, y0 - 10) + dimLine(x0, y0 - 14, x0, y0 - 6) + dimLine(x0 + sw, y0 - 14, x0 + sw, y0 - 6);
-  p += txt(x0 + sw / 2, y0 - 13, '48"', { size: 10, weight: 700, fill: '#1a1a2e' });
+  p += txt(x0 + sw / 2, y0 - 13, fmt(BB_SW) + '"', { size: 10, weight: 700, fill: '#1a1a2e' });
   p += dimLine(x0 - 12, y0, x0 - 12, y0 + sh) + dimLine(x0 - 16, y0, x0 - 8, y0) + dimLine(x0 - 16, y0 + sh, x0 - 8, y0 + sh);
-  p += txt(x0 - 14, y0 + sh / 2, '96"', { size: 10, weight: 700, fill: '#1a1a2e', rotate: -90 });
+  p += txt(x0 - 14, y0 + sh / 2, fmt(BB_SH) + '"', { size: 10, weight: 700, fill: '#1a1a2e', rotate: -90 });
   p += txt(x0, y0 - 18, `Sheet ${idx + 1} of ${total}`, { anchor: 'start', size: 11, weight: 700, fill: '#1d4ed8' });
   const vbW = x0 + sw + 12, vbH = y0 + sh + 14;
   return `<svg viewBox="0 0 ${vbW} ${vbH}" width="100%">${p}</svg>`;
@@ -2160,10 +2223,16 @@ function renderMultipliers() {
     </div>`).join('');
 }
 
+/* ---- Editable sheet sizes ---- */
+function renderSheets() {
+  $('sheet-card-w').value = SHEETS.cardW; $('sheet-card-h').value = SHEETS.cardH;
+  $('sheet-bb-w').value = SHEETS.bbW; $('sheet-bb-h').value = SHEETS.bbH;
+}
+
 /* ---- Backup / restore ---- */
 function exportBackup() {
   const data = { app: 'ups-team-tools', section: 'box-finder', version: DATA_VERSION,
-                 exportedAt: new Date().toISOString(), inventory: INVENTORY, cushion: CUSHION, multipliers: MULTIPLIERS };
+                 exportedAt: new Date().toISOString(), inventory: INVENTORY, cushion: CUSHION, multipliers: MULTIPLIERS, sheets: SHEETS };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -2187,6 +2256,7 @@ function importBackup(file) {
       INVENTORY = cleaned;
       if (d.cushion) CUSHION = Object.assign({}, DEFAULT_CUSHION, d.cushion);
       if (d.multipliers) MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS, d.multipliers);
+      if (d.sheets) { SHEETS = Object.assign({}, DEFAULT_SHEETS, d.sheets); applySheets(); persistSheets(); renderSheets(); }
       sortInventory(); persistInventory(); persistCushion(); persistMultipliers();
       renderInventory(); renderCushion(); renderMultipliers();
       alert(`Imported ${INVENTORY.length} boxes successfully.`);
@@ -2201,8 +2271,9 @@ function restoreDefaults() {
   INVENTORY = JSON.parse(JSON.stringify(DEFAULT_INVENTORY));
   CUSHION = Object.assign({}, DEFAULT_CUSHION);
   MULTIPLIERS = Object.assign({}, DEFAULT_MULTIPLIERS);
-  sortInventory(); persistInventory(); persistCushion(); persistMultipliers();
-  renderInventory(); renderCushion(); renderMultipliers();
+  SHEETS = Object.assign({}, DEFAULT_SHEETS); applySheets();
+  sortInventory(); persistInventory(); persistCushion(); persistMultipliers(); persistSheets();
+  renderInventory(); renderCushion(); renderMultipliers(); renderSheets();
   flashSaved('Defaults restored ✓');
 }
 
@@ -2235,6 +2306,18 @@ $('mult-grid').addEventListener('input', e => {
     if ($('cb-price').classList.contains('show')) cbGenerate();
   }
 });
+$('set-sheets').addEventListener('input', e => {
+  const inp = e.target.closest('input[data-sheet]');
+  if (!inp) return;
+  const v = parseFloat(inp.value);
+  if (!isNaN(v) && v > 0) {
+    SHEETS[inp.dataset.sheet] = v;
+    applySheets();
+    persistSheets(); flashSaved();
+    if ($('cb-price').classList.contains('show') || $('cb-not-feasible').classList.contains('show')) cbGenerate();
+    if ($('bb-result').classList.contains('show') || $('bb-infeasible').classList.contains('show')) bbGenerate();
+  }
+});
 $('export-btn').addEventListener('click', exportBackup);
 $('import-btn').addEventListener('click', () => $('import-file').click());
 $('import-file').addEventListener('change', e => { if (e.target.files[0]) importBackup(e.target.files[0]); e.target.value = ''; });
@@ -2255,6 +2338,7 @@ sortInventory();
 renderInventory();
 renderCushion();
 renderMultipliers();
+renderSheets();
 
 /* ---- Email / Share diagrams ---------------------------------------------
    mailto: cannot carry image attachments, so we render each on-screen SVG to
