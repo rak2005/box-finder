@@ -447,6 +447,9 @@
   <button class="tab-btn" onclick="showTab('blue-board', this)">
     <span class="tab-icon">🔷</span>Blue Board
   </button>
+  <button class="tab-btn" onclick="showTab('girth', this)">
+    <span class="tab-icon">📏</span>Girth
+  </button>
   <button class="tab-btn" onclick="showTab('settings', this)">
     <span class="tab-icon">⚙️</span>Settings
   </button>
@@ -723,6 +726,54 @@
     </div>
   </div>
 </div>
+
+<!-- ══════════════ TAB — GIRTH CALCULATOR ══════════════ -->
+<div id="girth" class="tab-content">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+      <div><h2>Girth Calculator</h2></div>
+      <div class="hdr-actions">
+        <button class="btn btn-sm btn-outline" id="g-clear" type="button">Clear</button>
+      </div>
+    </div>
+
+
+    <div class="form-row col3">
+      <div class="form-group"><label>Dimension 1 (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="g-d1" placeholder="e.g. 30"></div>
+      <div class="form-group"><label>Dimension 2 (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="g-d2" placeholder="e.g. 18"></div>
+      <div class="form-group"><label>Dimension 3 (in)</label><input type="number" inputmode="decimal" min="0" step="0.25" id="g-d3" placeholder="e.g. 16"></div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="result-empty" id="g-empty">
+      <div class="result-icon">📏</div>
+      <p>Enter all three dimensions<br>to check girth &amp; UPS size limits</p>
+    </div>
+
+    <!-- Verdict -->
+    <div class="ups-warning girth-red" id="g-verdict-red">
+      <div class="warn-icon">🚫</div>
+      <div class="warn-text"><strong>TOO LARGE — CANNOT SHIP UPS</strong>
+        <span id="g-verdict-red-txt"></span></div>
+    </div>
+    <div class="ups-warning danger" id="g-verdict-yellow">
+      <div class="warn-icon">🔶</div>
+      <div class="warn-text"><strong>Ships — Large Package Surcharge Applies</strong>
+        <span id="g-verdict-yellow-txt"></span></div>
+    </div>
+    <div class="ups-warning" id="g-verdict-green" style="background:#f0fdf4; border:2px solid #22c55e; border-left:6px solid #22c55e;">
+      <div class="warn-icon">✅</div>
+      <div class="warn-text"><strong style="color:#15803d;">OK to Ship UPS</strong>
+        <span id="g-verdict-green-txt" style="color:#15803d;"></span></div>
+    </div>
+
+    <!-- Numbers breakdown -->
+    <div class="price-breakdown" id="g-numbers" style="display:none; margin-top:14px;">
+      <div class="price-item total" style="grid-column:1 / -1;"><div class="pi-label">Length + Girth</div><div class="pi-value" id="g-total">—</div></div>
+    </div>
+  </div>
+</div>
+
 <div id="settings" class="tab-content">
 
   <div class="set-nav" id="set-nav">
@@ -1440,6 +1491,51 @@ function showTab(id, btn) {
   btn.classList.add('active');
   window.scrollTo(0, 0);
 }
+
+/* ════════════════ GIRTH CALCULATOR ════════════════
+   UPS measures Length as the longest side; girth = 2×(other two sides).
+   • Length + girth > 165" OR length > 108"   → too large, cannot ship.
+   • Length + girth > 130" OR length > 96"    → Large Package Surcharge.
+   • otherwise                                 → OK to ship. */
+function girthCalc() {
+  const vals = ['g-d1','g-d2','g-d3'].map(id => parseFloat($(id).value));
+  const ready = vals.every(v => v > 0);
+  // Verdict banners are .ups-warning (shown via the .show class); the empty
+  // state and numbers grid are plain blocks toggled with inline display.
+  const verdict = (id, on) => $(id).classList.toggle('show', !!on);
+
+  $('g-empty').style.display = ready ? 'none' : '';
+  $('g-numbers').style.display = ready ? '' : 'none';
+  verdict('g-verdict-red', false);
+  verdict('g-verdict-yellow', false);
+  verdict('g-verdict-green', false);
+  if (!ready) return;
+
+  const dims = [...vals].sort((a, b) => b - a);   // longest first
+  const L = dims[0], girth = 2 * dims[1] + 2 * dims[2], lpg = L + girth;
+
+  $('g-total').textContent = fmt(r2(lpg)) + '"';
+
+  if (lpg > 165 || L > 108) {
+    $('g-verdict-red-txt').textContent = L > 108
+      ? `Length ${fmt(r2(L))}" exceeds the 108" UPS maximum.`
+      : `Length + girth = ${fmt(r2(lpg))}" exceeds the 165" UPS maximum.`;
+    verdict('g-verdict-red', true);
+  } else if (lpg > 130 || L > 96) {
+    $('g-verdict-yellow-txt').textContent = L > 96
+      ? `Longest side ${fmt(r2(L))}" exceeds 96" — UPS adds a Large Package Surcharge.`
+      : `Length + girth = ${fmt(r2(lpg))}". Over 130" — UPS adds a Large Package Surcharge.`;
+    verdict('g-verdict-yellow', true);
+  } else {
+    $('g-verdict-green-txt').textContent = `Length + girth = ${fmt(r2(lpg))}". Within UPS limits (no surcharge, under 165" max).`;
+    verdict('g-verdict-green', true);
+  }
+}
+['g-d1','g-d2','g-d3'].forEach(id => $(id).addEventListener('input', girthCalc));
+$('g-clear').addEventListener('click', () => {
+  ['g-d1','g-d2','g-d3'].forEach(id => $(id).value = '');
+  girthCalc();
+});
 
 // Box Finder history
 histInit('bf', d => {
